@@ -21,7 +21,7 @@ class Measurement():
         self.q              = None
         self.sq             = None
         self.u              = None
-        self.uq             = None
+        self.su             = None
         self.PD             = None
         self.sPD            = None
         self.EVPA           = None
@@ -107,10 +107,10 @@ def plot(data):
 
 def readData(star_name):
     data = []
-    # reading all data in subfolders like  ./Markkanen/Mark_0_1  ./Markkanen/Mark_0_2
+    # reading all data in subfolders like  ./Markkanen/Mark_0  ./Markkanen/Mark_1
     # finding thier names first
     files = os.listdir(DATA_FOLD)
-    files = filter(lambda x: x.startswith(star_name), files)
+    files = filter(lambda x: x == star_name, files)
     dirs = (fil for fil in files if os.path.isdir(os.path.join(DATA_FOLD, fil)))
     dirs = sorted(list(dirs), key=lambda a: a)
 
