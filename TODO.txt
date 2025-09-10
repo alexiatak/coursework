@@ -1,0 +1,16 @@
+
+R-band
+1. Finish processing R-band 146 sources
+2. Correct the measurements using instumental polarization data
+3. Find weighted mean polzarization values
+4. Translate EVPA from equatorial to galactic coordinates
+5. Make sky plo wih line segments showing polarization data
+
+
+
+Multiband
+1. Process both standars and multiband data for tne three Mark_* stars.
+2. Find instrumenal polarization in each band and correct Mark_* data for it
+3. Plot data + Serkowski curve fit for the three stars
+
+
