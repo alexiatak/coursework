@@ -1,5 +1,8 @@
 
+import matplotlib.pyplot as plt
+plt.style.use('../create_model/MNRAS_Style.mplstyle')
 import pickle
+import os
 from scipy import optimize, interpolate
 from scipy.special import erf
 from scipy.optimize import minimize
@@ -8,6 +11,8 @@ from uncertainties import unumpy
 from uncertainties import ufloat
 from uncertainties import umath
 import numpy as np
+from astropy import stats
+from collections import OrderedDict
 
 INP_FILE = '../collect_filt_raw_data/Markkanen/Markkanen.dat'
 OUT_FILE = 'Markkanen_inst_corr_separ_shots.dat'
@@ -189,8 +194,32 @@ def combine_measurements(star_name, corr_data):
         if o.name == star_name:
             data.append(o)
 
-    # calulating weighted average
+    # calulating weighted mean
+    all_q     =  list( map(lambda x: x.q.n, data) )
+    all_q_err =  list( map(lambda x: x.q.s, data) )
+    all_u     =  list( map(lambda x: x.u.n, data) )
+    all_u_err =  list( map(lambda x: x.u.s, data) )
 
+    q_res = stats.sigma_clipped_stats(all_q, sigma=2.8) # returns (mean, median, stddev)
+    q_std_st = q_res[2]
+    u_res = stats.sigma_clipped_stats(all_u, sigma=2.8) # returns (mean, median, stddev)
+    u_std_st = u_res[2]
+
+    wmean_q = np.average(all_q, weights=list(map(lambda x: 1.0/x, all_q_err)))
+    wmean_u = np.average(all_u, weights=list(map(lambda x: 1.0/x, all_u_err)))
+    std_q = np.std(all_q)/np.sqrt(len(all_q)) # standard error of the mean
+    std_u = np.std(all_u)/np.sqrt(len(all_u)) # standard error of the mean
+
+    # saving calculated value to output later
+    meanJD = np.mean ( list( map(lambda x: x.JD, data) ) )
+    comb_star = Obs(star_name, meanJD, wmean_q, std_q, wmean_u, std_u, 0, 0)
+
+    # calulating simple mean
+    qs = np.array( list( map(lambda x: x.q, data) ) )
+    q_mean  = qs.mean()
+
+    us = np.array( list( map(lambda x: x.u, data) ) )
+    u_mean  = us.mean()
 
     # plotting
     plt.rc('text', usetex=True)
@@ -200,23 +229,45 @@ def combine_measurements(star_name, corr_data):
 
     plt.xlabel("q")
     plt.ylabel("u")
-    plt.errorbar(s1.q.n,s1.u.n,xerr=s1.q.s,yerr=s1.u.s,c='b',label=s1.name)
-    plt.errorbar(s2.q.n,s2.u.n,xerr=s2.q.s,yerr=s2.u.s,c='b')
-    plt.errorbar(s3.q.n,s3.u.n,xerr=s3.q.s,yerr=s3.u.s,c='b')
-    plt.errorbar(s4.q.n,s4.u.n,xerr=s4.q.s,yerr=s4.u.s,c='b')
-    plt.errorbar(s5.q.n,s5.u.n,xerr=s5.q.s,yerr=s5.u.s,c='b')
+    for s in data:
+        plt.errorbar(s.q.n, s.u.n, xerr=s.q.s, yerr=s.u.s,c='b', label=s.name)
 
     # the centroid value
-    plt.errorbar(q_z.n,u_z.n,xerr=q_z.s,yerr=u_z.s,c='yellow',label='median')
+    plt.errorbar(q_mean.n, u_mean.n, xerr=q_mean.s, yerr=u_mean.s, c='k', label='mean')
+    plt.errorbar(wmean_q, wmean_u, xerr=std_q, yerr=std_u, c='yellow', label='weighted mean')
 
-    plt.legend()
+    # to make only 1 legend key per star
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    plt.legend(by_label.values(), by_label.keys(), loc='upper left', bbox_to_anchor=(1, 1), fontsize=7)
 
-    plt.axvline(0)
-    plt.axhline(0)
+    plt.axvline(0, dashes=(1,2))
+    plt.axhline(0, dashes=(1,2))
+    plt.savefig(os.path.join(os.getcwd(), 'plots', star_name+'.png'), bbox_inches='tight')
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     return comb_star
 
-def writeData(comb_star):
+def writeData(comb_stars):
+    header = '#Name   JD    P[%]   sP[%]    PA[deg]  sPA[deg]   q        sq       u        su\n'
+    fop_out = open('Markkanen_final.dat','w')
+    fop_out.write(header)
+    for comb_star in comb_stars:
+        out_str = '{star: <16}'.format(star=comb_star.name)
+        out_str += "{:13.5f}".format(comb_star.JD)
+        out_str += "{:7.2f}".format(round(comb_star.getP().n*100, 2))
+        out_str += "{:7.2f}".format(round(comb_star.getP().s*100, 2))
+        out_str += "{:8.2f}".format(round(comb_star.getPA().n, 2))
+        out_str += "{:8.2f}".format(round(comb_star.getPA().s, 2))
+        out_str += "{:9.5f}".format(comb_star.q.n)
+        out_str += "{:9.5f}".format(comb_star.q.s)
+        out_str += "{:9.5f}".format(comb_star.u.n)
+        out_str += "{:9.5f}".format(comb_star.u.s)
+        out_str += "\n"
+        fop_out.write(out_str)
+    fop_out.close()
     return
 
 if __name__ == "__main__":
@@ -236,8 +287,13 @@ if __name__ == "__main__":
     # output corrected data
     writeDataSeparateShots(corr_data)
 
-    uniq_star_names = list( map(lambda x: x.name, corr_data ) )
+    comb_stars = []
+    uniq_star_names = list( set( map(lambda x: x.name, corr_data ) ) )
+    uniq_star_names = sorted(uniq_star_names, key=lambda x: int(x.split("_")[-1]))
     for star_name in uniq_star_names:
         comb_star = combine_measurements(star_name, corr_data)
-        writeData(comb_star)
+        comb_stars.append(comb_star)
+
+    writeData(comb_stars)
+
 
