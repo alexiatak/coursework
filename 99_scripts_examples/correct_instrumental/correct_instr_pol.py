@@ -17,8 +17,8 @@ from collections import OrderedDict
 INP_FILE = '../collect_filt_raw_data/Markkanen/Markkanen.dat'
 OUT_FILE = 'Markkanen_inst_corr_separ_shots.dat'
 
-Deattachments = [2460310.5,2460676.5]#,2461041.5]
-years = ['2024']#,'2025']
+Deattachments = [2460310.5,2460676.5,2461041.5]
+years = ['2024','2025']
 
 class Obs():
     def __init__(self,name,JD,q,qerr,u,uerr,x,y):

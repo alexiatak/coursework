@@ -19,10 +19,8 @@ from collections import OrderedDict
 
 DEV_LIMIT = 3 # factor of std_deviation from weighted mean
 
-# in Sep 2022 one of the lenses in the collimator had been deattached then it had been fixed later
-# therefore we split 2022 into two pieces
-Deattachments = [2460310.5,2460676.5]#,2461041.5]
-years = ['2024']#,'2025']
+Deattachments = [2460310.5,2460676.5,2461041.5]
+years = ['2024','2025']
 
 graphWidth = 920 # units are pixels
 graphHeight = 600 # units are pixels
