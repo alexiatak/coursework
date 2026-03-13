@@ -29,15 +29,17 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.visualization import simple_norm
 import pickle
-
+import sep
 
 
 aperts     = [ 18.0,19.0,20.0,21.0,22.0] # radius in pixels
 aperts_in  = [25.0,25.0,25.0,25.0,25.0]
 aperts_out = [35.0,35.0,35.0,35.0,35.0]
 
-MANUAL_FOR_ALL_SHOTS = True
-#MANUAL_FOR_ALL_SHOTS = False
+#MANUAL_FOR_ALL_SHOTS = True
+MANUAL_FOR_ALL_SHOTS = False
+
+USE_SEP = True
 
 LEVELS = 99 # in percent change to 80 for bright stars
 
@@ -237,6 +239,27 @@ def DetectStars(s):
     daofind = DAOStarFinder(fwhm=3.0, threshold=5.*bgr_std)
     sources = daofind(s.data - bgr_median)
     s.all_srcs = sources
+
+def DetectStars_SEP(s):
+    """
+    Detect stars using SEP (Source Extractor) instead of DAOStarFinder.
+    """
+    import sep
+
+    # Convert data to float32
+    data_float = s.data.astype(np.float32)
+
+    # Compute background
+    bkg = sep.Background(data_float)
+    data_sub = data_float - bkg.back()       # <-- use parentheses
+    threshold = 5.0 * bkg.globalrms         # 5 sigma above global RMS
+
+    # Extract sources
+    objects = sep.extract(data_sub, thresh=threshold, minarea=5)
+
+    # Convert to structured array compatible with RunPhotom
+    s.all_srcs = np.array([(obj['x'], obj['y']) for obj in objects],
+                          dtype=[('xcentroid', float), ('ycentroid', float)])
 
 def RunPhotom(s):
     # find the spots we need
@@ -523,7 +546,11 @@ def ProcObj():
         s.x0, s.x1, s.x2, s.x3 = xs_0
         s.y0, s.y1, s.y2, s.y3 = ys_0
 
-        DetectStars(s)
+        if USE_SEP:
+            DetectStars_SEP(s)
+        else:
+            DetectStars(s)
+
         RunPhotom(s)
         p = CalcPol(s)
         Plot(p, s)
