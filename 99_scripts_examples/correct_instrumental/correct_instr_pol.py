@@ -1,6 +1,6 @@
 
 import matplotlib.pyplot as plt
-plt.style.use('../create_model/MNRAS_Style.mplstyle')
+#plt.style.use('../create_model/MNRAS_Style.mplstyle')
 import pickle
 import os
 from scipy import optimize, interpolate
@@ -13,6 +13,7 @@ from uncertainties import umath
 import numpy as np
 from astropy import stats
 from collections import OrderedDict
+import re  # for shorting the folders ending with letters ex. Mark_221B
 
 INP_FILE = '../collect_filt_raw_data/Markkanen/Markkanen.dat'
 OUT_FILE = 'Markkanen_inst_corr_separ_shots.dat'
@@ -252,27 +253,31 @@ def combine_measurements(star_name, corr_data):
 
 def writeData(comb_stars):
     header = '#Name   JD    P[%]   sP[%]    PA[deg]  sPA[deg]   q        sq       u        su\n'
-    fop_out = open('Markkanen_final.dat','w')
-    fop_out.write(header)
-    for comb_star in comb_stars:
-        out_str = '{star: <16}'.format(star=comb_star.name)
-        out_str += "{:13.5f}".format(comb_star.JD)
-        out_str += "{:7.2f}".format(round(comb_star.getP().n*100, 2))
-        out_str += "{:7.2f}".format(round(comb_star.getP().s*100, 2))
-        out_str += "{:8.2f}".format(round(comb_star.getPA().n, 2))
-        out_str += "{:8.2f}".format(round(comb_star.getPA().s, 2))
-        out_str += "{:9.5f}".format(comb_star.q.n)
-        out_str += "{:9.5f}".format(comb_star.q.s)
-        out_str += "{:9.5f}".format(comb_star.u.n)
-        out_str += "{:9.5f}".format(comb_star.u.s)
-        out_str += "\n"
-        fop_out.write(out_str)
-    fop_out.close()
+    
+    #fop_out = open('Markkanen_final.dat','w')
+    for path in ['Markkanen_final.dat', '../../0_data/R/Markkanen_final.dat', '../../1_correct_instr/Markkanen_final.dat']:
+        fop_out = open(path, 'w')               #save the data inside wdirectory + 2 folders
+        fop_out.write(header)
+        
+        for comb_star in comb_stars:
+            out_str = '{star: <16}'.format(star=comb_star.name)
+            out_str += "{:13.5f}".format(comb_star.JD)
+            out_str += "{:7.2f}".format(round(comb_star.getP().n*100, 2))
+            out_str += "{:7.2f}".format(round(comb_star.getP().s*100, 2))
+            out_str += "{:8.2f}".format(round(comb_star.getPA().n, 2))
+            out_str += "{:8.2f}".format(round(comb_star.getPA().s, 2))
+            out_str += "{:9.5f}".format(comb_star.q.n)
+            out_str += "{:9.5f}".format(comb_star.q.s)
+            out_str += "{:9.5f}".format(comb_star.u.n)
+            out_str += "{:9.5f}".format(comb_star.u.s)
+            out_str += "\n"
+            fop_out.write(out_str)
+        fop_out.close()
     return
 
 if __name__ == "__main__":
     print("#"*80)
-    print("Working on 2024 Markkanen cloud data")
+    print("Working on 2024 and 2025 Markkanen cloud data")
     print("#"*80)
     # reading instrumental Stokes parameters and the EVPA zero-point
     instQ, instU = readInstPol()
@@ -289,7 +294,9 @@ if __name__ == "__main__":
 
     comb_stars = []
     uniq_star_names = list( set( map(lambda x: x.name, corr_data ) ) )
-    uniq_star_names = sorted(uniq_star_names, key=lambda x: int(x.split("_")[-1]))
+    #uniq_star_names = sorted(uniq_star_names, key=lambda x: int(x.split("_")[-1]))
+    uniq_star_names = sorted(uniq_star_names, key=lambda x: int(re.findall(r'\d+', x.split("_")[-1])[0]))
+    
     for star_name in uniq_star_names:
         comb_star = combine_measurements(star_name, corr_data)
         comb_stars.append(comb_star)
