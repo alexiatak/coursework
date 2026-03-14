@@ -1,8 +1,8 @@
-Environment --> Activate the working conda environment before running the scripts:
-conda activate mark
-⸻
 Workflow
 -------------------------------------------------------------------------------------------------
+Environment --> Activate the working conda environment before running the scripts:
+conda activate mark
+
 Step 1 — Add raw star data
 Add star folders to: coursework/0_raw_data/R/Markkanen/
 
