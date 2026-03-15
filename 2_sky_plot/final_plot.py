@@ -81,7 +81,7 @@ hp.graticule()
 hp.projscatter(targ_all_l, targ_all_b, marker='.', c='g', lonlat=True, coord='G', label='remaining')
 hp.projscatter(targ_done_l, targ_done_b, marker='.', c='k', lonlat=True, coord='G', label='observed')
 plt.legend()
-plt.savefig('mark_plot.png')
+plt.savefig('mark_observed_targets.png')
 plt.clf()
 
 
@@ -206,7 +206,7 @@ class Stand():
 ##reading our 2 files and saving the needed information in one database
 
 
-df_dat = pd.read_csv("Markkanen_final.dat", sep=r"\s+", engine="python")
+df_dat = pd.read_csv("../0_data/R/Markkanen_final_merged.dat", sep=r"\s+", engine="python")
 df_dat.rename(columns=lambda x: x.lstrip('#'), inplace=True)  # remove '#' in "#Name"
 #print(df_dat.head())
 
@@ -310,6 +310,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas, scale = 1000):
         # fig.show_lines(linelist1[:-1], layer='line', color='r', linewidths=1.3)
         # fig.show_lines([linelist1[-1]], layer='line1', color='cyan', linewidths=1.3)
         #fig.show_ellipses([35.3125], [25.3], 0.09, 0.07, angle=17, layer='ellipse', color='g') 
+        plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
         plt.show()      
 
 fits.info("diff_ebv_gnilc_lenz.fits")
@@ -325,3 +326,5 @@ coordang = 0.
 pas_forplot = angles + coordang
    
 segments_on_map( eikona_fits, ra, dec, Ps, pas_forplot, scale = 0.5 )
+#plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
+plt.show()
