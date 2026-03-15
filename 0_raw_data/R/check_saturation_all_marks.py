@@ -10,6 +10,7 @@ SAT_LIMIT = 50000
 MIN_PEAK = 1000              # ignore weak noise peaks
 EXCLUSION_RADIUS = 20        # so one spot is not selected many times
 BOX_HALFSIZE = 6             # local box around each bright spot
+CENTER_HALF_SIZE = 150        # search only in a central 300x300 box
 
 
 
@@ -19,17 +20,25 @@ def find_four_spot_maxima(
     exclusion_radius=EXCLUSION_RADIUS,
     box_halfsize=BOX_HALFSIZE,
 ):
-    
-    #Find the 4 brightest separated peaks and return the local maxima around them.
-   
-    mx = maximum_filter(data, size=7)
-    peaks = (data == mx) & (data > min_peak)
+    # search only in the central zone
+    ny, nx = data.shape
+    cy, cx = ny // 2, nx // 2
+
+    y1 = max(0, cy - CENTER_HALF_SIZE)
+    y2 = min(ny, cy + CENTER_HALF_SIZE)
+    x1 = max(0, cx - CENTER_HALF_SIZE)
+    x2 = min(nx, cx + CENTER_HALF_SIZE)
+
+    central_data = data[y1:y2, x1:x2]
+
+    mx = maximum_filter(central_data, size=7)
+    peaks = (central_data == mx) & (central_data > min_peak)
 
     ys, xs = np.where(peaks)
     if len(xs) == 0:
         return []
 
-    vals = data[ys, xs]
+    vals = central_data[ys, xs]
     order = np.argsort(vals)[::-1]
 
     selected = []
@@ -50,14 +59,15 @@ def find_four_spot_maxima(
 
     maxima = []
     for y, x in selected:
-        y1 = max(0, y - box_halfsize)
-        y2 = min(data.shape[0], y + box_halfsize + 1)
-        x1 = max(0, x - box_halfsize)
-        x2 = min(data.shape[1], x + box_halfsize + 1)
-        local_max = np.max(data[y1:y2, x1:x2])
+        yy1 = max(0, y - box_halfsize)
+        yy2 = min(central_data.shape[0], y + box_halfsize + 1)
+        xx1 = max(0, x - box_halfsize)
+        xx2 = min(central_data.shape[1], x + box_halfsize + 1)
+        local_max = np.max(central_data[yy1:yy2, xx1:xx2])
         maxima.append(local_max)
 
     return maxima
+
 
 
 def check_fits_file(fits_path):
@@ -120,7 +130,7 @@ def main():
                 if saturated:
                     found_any_saturated = True
                     print(f"[SATURATED] {mark_dir.name} -> {fits_file.name}")
-                    print(f"            maxima = {[round(m, 1) for m in maxima]}")
+                    print(f"            central maxima = {[int(m) for m in maxima]}")
 
     if not found_any_saturated:
         print("No saturated FITS files found.")

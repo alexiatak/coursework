@@ -1,324 +1,75 @@
-[SATURATED] Mark_106 -> 20_Mark_106_00_R_22.00_2024_05_30-21_15_52.fits
-            maxima = [np.float64(60350.0), np.float64(6157.0), np.float64(6110.0), np.float64(5826.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_01_R_22.00_2024_05_30-21_16_24.fits
-            maxima = [np.float64(60360.0), np.float64(5681.0), np.float64(5598.0), np.float64(5575.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_02_R_22.00_2024_05_30-21_16_56.fits
-            maxima = [np.float64(60376.0), np.float64(6071.0), np.float64(5820.0), np.float64(5806.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_03_R_22.00_2024_05_30-21_17_28.fits
-            maxima = [np.float64(60368.0), np.float64(5918.0), np.float64(5815.0), np.float64(5762.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_04_R_22.00_2024_05_30-21_18_01.fits
-            maxima = [np.float64(60414.0), np.float64(6194.0), np.float64(6182.0), np.float64(6042.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_05_R_22.00_2024_05_30-21_18_33.fits
-            maxima = [np.float64(60402.0), np.float64(5283.0), np.float64(5244.0), np.float64(4917.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_06_R_22.00_2024_05_30-21_19_05.fits
-            maxima = [np.float64(60393.0), np.float64(6044.0), np.float64(5917.0), np.float64(5742.0)]
-[SATURATED] Mark_106 -> 20_Mark_106_07_R_22.00_2024_05_30-21_19_37.fits
-            maxima = [np.float64(60410.0), np.float64(5634.0), np.float64(5489.0), np.float64(5130.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_00_R_20.00_2024_05_30-19_52_05.fits
-            maxima = [np.float64(62668.0), np.float64(62230.0), np.float64(28295.0), np.float64(27305.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_01_R_20.00_2024_05_30-19_52_35.fits
-            maxima = [np.float64(62575.0), np.float64(62264.0), np.float64(29110.0), np.float64(27418.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_02_R_20.00_2024_05_30-19_53_05.fits
-            maxima = [np.float64(62346.0), np.float64(61447.0), np.float64(27418.0), np.float64(27038.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_03_R_20.00_2024_05_30-19_53_35.fits
-            maxima = [np.float64(59606.0), np.float64(53377.0), np.float64(21257.0), np.float64(20771.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_05_R_20.00_2024_05_30-19_54_35.fits
-            maxima = [np.float64(62664.0), np.float64(62060.0), np.float64(27850.0), np.float64(27540.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_06_R_20.00_2024_05_30-19_55_05.fits
-            maxima = [np.float64(62003.0), np.float64(61786.0), np.float64(27866.0), np.float64(27548.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_07_R_20.00_2024_05_30-19_55_35.fits
-            maxima = [np.float64(61598.0), np.float64(60020.0), np.float64(24203.0), np.float64(23978.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_08_R_20.00_2024_05_30-19_56_43.fits
-            maxima = [np.float64(61399.0), np.float64(61376.0), np.float64(23676.0), np.float64(23067.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_09_R_20.00_2024_05_30-19_57_13.fits
-            maxima = [np.float64(58438.0), np.float64(57852.0), np.float64(21353.0), np.float64(21217.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_10_R_20.00_2024_05_30-19_57_43.fits
-            maxima = [np.float64(61766.0), np.float64(59346.0), np.float64(24311.0), np.float64(23962.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_11_R_20.00_2024_05_30-19_58_13.fits
-            maxima = [np.float64(61994.0), np.float64(61878.0), np.float64(25155.0), np.float64(24472.0)]
-[SATURATED] Mark_123 -> 22_Mark_123_12_R_20.00_2024_05_30-19_58_43.fits
-            maxima = [np.float64(55261.0), np.float64(54703.0), np.float64(22551.0), np.float64(20634.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_00_R_18.00_2024_05_30-21_47_24.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64102.0), np.float64(62429.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_01_R_18.00_2024_05_30-21_48_22.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64002.0), np.float64(60394.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_02_R_18.00_2024_05_30-21_48_50.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64647.0), np.float64(63834.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_03_R_18.00_2024_05_30-21_49_18.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64900.0), np.float64(63754.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_04_R_18.00_2024_05_30-21_49_46.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65232.0), np.float64(64341.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_05_R_18.00_2024_05_30-21_50_14.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65058.0), np.float64(64046.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_06_R_18.00_2024_05_30-21_50_42.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64925.0), np.float64(63328.0)]
-[SATURATED] Mark_144 -> 38_Mark_144_07_R_18.00_2024_05_30-21_51_29.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65171.0), np.float64(63273.0)]
-[SATURATED] Mark_15 -> 12_Mark_15_06_R_9.00_2024_04_25-22_39_05.fits
-            maxima = [np.float64(62168.0), np.float64(49004.0), np.float64(3047.0), np.float64(1335.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_00_R_17.00_2024_04_25-22_11_10.fits
-            maxima = [np.float64(63959.0), np.float64(63947.0), np.float64(63621.0), np.float64(63424.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_01_R_17.00_2024_04_25-22_11_50.fits
-            maxima = [np.float64(64003.0), np.float64(63657.0), np.float64(63480.0), np.float64(63272.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_02_R_17.00_2024_04_25-22_12_17.fits
-            maxima = [np.float64(64006.0), np.float64(63966.0), np.float64(63706.0), np.float64(63524.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_03_R_17.00_2024_04_25-22_12_44.fits
-            maxima = [np.float64(64008.0), np.float64(64001.0), np.float64(63909.0), np.float64(63682.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_04_R_17.00_2024_04_25-22_13_26.fits
-            maxima = [np.float64(64032.0), np.float64(63995.0), np.float64(63951.0), np.float64(63693.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_05_R_17.00_2024_04_25-22_14_06.fits
-            maxima = [np.float64(64012.0), np.float64(63985.0), np.float64(63933.0), np.float64(63644.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_06_R_17.00_2024_04_25-22_14_33.fits
-            maxima = [np.float64(64013.0), np.float64(64007.0), np.float64(63979.0), np.float64(63649.0)]
-[SATURATED] Mark_16 -> 13_Mark_16_07_R_17.00_2024_04_25-22_15_19.fits
-            maxima = [np.float64(64028.0), np.float64(63971.0), np.float64(63943.0), np.float64(63695.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_00_R_7.00_2024_05_28-19_53_49.fits
-            maxima = [np.float64(61277.0), np.float64(57749.0), np.float64(42046.0), np.float64(37490.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_01_R_7.00_2024_05_28-19_54_06.fits
-            maxima = [np.float64(63358.0), np.float64(62095.0), np.float64(50618.0), np.float64(46179.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_02_R_7.00_2024_05_28-19_54_23.fits
-            maxima = [np.float64(63244.0), np.float64(60846.0), np.float64(60659.0), np.float64(53330.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_03_R_7.00_2024_05_28-19_54_54.fits
-            maxima = [np.float64(63517.0), np.float64(61111.0), np.float64(59341.0), np.float64(54033.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_04_R_7.00_2024_05_28-19_55_11.fits
-            maxima = [np.float64(64359.0), np.float64(63248.0), np.float64(56046.0), np.float64(50201.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_05_R_7.00_2024_05_28-19_55_28.fits
-            maxima = [np.float64(64052.0), np.float64(63274.0), np.float64(55085.0), np.float64(50305.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_06_R_7.00_2024_05_28-19_56_00.fits
-            maxima = [np.float64(61886.0), np.float64(57831.0), np.float64(56428.0), np.float64(50286.0)]
-[SATURATED] Mark_182 -> 21_Mark_182_07_R_7.00_2024_05_28-19_56_17.fits
-            maxima = [np.float64(63359.0), np.float64(57209.0), np.float64(53503.0), np.float64(46694.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_00_R_21.00_2024_05_30-20_48_47.fits
-            maxima = [np.float64(53153.0), np.float64(49998.0), np.float64(22483.0), np.float64(21646.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_01_R_21.00_2024_05_30-20_49_18.fits
-            maxima = [np.float64(62979.0), np.float64(62910.0), np.float64(28019.0), np.float64(27490.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_02_R_21.00_2024_05_30-20_49_49.fits
-            maxima = [np.float64(62959.0), np.float64(62932.0), np.float64(30343.0), np.float64(29606.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_03_R_21.00_2024_05_30-20_50_20.fits
-            maxima = [np.float64(63307.0), np.float64(62942.0), np.float64(31764.0), np.float64(30577.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_04_R_21.00_2024_05_30-20_50_51.fits
-            maxima = [np.float64(63473.0), np.float64(63285.0), np.float64(30701.0), np.float64(30562.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_05_R_21.00_2024_05_30-20_51_22.fits
-            maxima = [np.float64(62181.0), np.float64(61595.0), np.float64(25289.0), np.float64(24530.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_06_R_21.00_2024_05_30-20_51_54.fits
-            maxima = [np.float64(63206.0), np.float64(63101.0), np.float64(29821.0), np.float64(28080.0)]
-[SATURATED] Mark_183 -> 25_Mark_183_07_R_21.00_2024_05_30-20_52_25.fits
-            maxima = [np.float64(63063.0), np.float64(62471.0), np.float64(28900.0), np.float64(27335.0)]
-[SATURATED] Mark_219 -> 8_Mark_219_06_R_11.00_2024_05_01-19_57_06.fits
-            maxima = [np.float64(61280.0), np.float64(1498.0), np.float64(1488.0), np.float64(1439.0)]
+[FAILED_TO_FIND_4_SPOTS] Mark_12 -> Markkanen/Mark_12/2460426.352662037/10_Mark_12_00_R_12.00_2024_04_25-20_26_44.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_12 -> Markkanen/Mark_12/2460426.352662037/10_Mark_12_01_R_12.00_2024_04_25-20_27_06.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_12 -> Markkanen/Mark_12/2460426.352662037/10_Mark_12_02_R_12.00_2024_04_25-20_27_28.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_12 -> Markkanen/Mark_12/2460426.352662037/10_Mark_12_06_R_12.00_2024_04_25-20_28_56.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_122 -> Markkanen/Mark_122/2460432.3873958336/17_Mark_122_06_R_22.00_2024_05_01-21_18_07.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_13 -> Markkanen/Mark_13/2460432.3041261574/4_Mark_13_01_R_15.00_2024_05_01-19_16_29.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_13 -> Markkanen/Mark_13/2460432.3041261574/4_Mark_13_03_R_15.00_2024_05_01-19_17_19.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_16 -> Markkanen/Mark_16/2460426.4257523147/13_Mark_16_01_R_17.00_2024_04_25-22_11_50.fits
 [FAILED_TO_FIND_4_SPOTS] Mark_233 -> Markkanen/Mark_233/2460432.3717939816/14_Mark_233_03_R_6.00_2024_05_01-20_54_26.fits
 [FAILED_TO_FIND_4_SPOTS] Mark_233 -> Markkanen/Mark_233/2460432.3717939816/14_Mark_233_04_R_6.00_2024_05_01-20_54_42.fits
-[SATURATED] Mark_24 -> 2_Mark_24_00_R_15.00_2025_04_14-23_20_38.fits
-            maxima = [np.float64(60850.0), np.float64(60054.0), np.float64(52127.0), np.float64(40714.0)]
-[SATURATED] Mark_24 -> 2_Mark_24_01_R_15.00_2025_04_14-23_21_02.fits
-            maxima = [np.float64(60332.0), np.float64(59775.0), np.float64(51683.0), np.float64(40268.0)]
-[SATURATED] Mark_24 -> 2_Mark_24_02_R_15.00_2025_04_14-23_21_28.fits
-            maxima = [np.float64(61878.0), np.float64(61633.0), np.float64(56907.0), np.float64(44503.0)]
-[SATURATED] Mark_24 -> 2_Mark_24_03_R_15.00_2025_04_14-23_21_53.fits
-            maxima = [np.float64(62345.0), np.float64(62016.0), np.float64(57841.0), np.float64(49492.0)]
-[SATURATED] Mark_24 -> 2_Mark_24_04_R_15.00_2025_04_14-23_22_18.fits
-            maxima = [np.float64(62559.0), np.float64(62376.0), np.float64(59848.0), np.float64(50656.0)]
-[SATURATED] Mark_24 -> 2_Mark_24_05_R_15.00_2025_04_14-23_22_43.fits
-            maxima = [np.float64(61673.0), np.float64(61138.0), np.float64(53280.0), np.float64(42947.0)]
 [FAILED_TO_FIND_4_SPOTS] Mark_248 -> Markkanen/Mark_248/2460432.32478588/7_Mark_248_04_R_7.00_2024_05_01-19_46_06.fits
 [SATURATED] Mark_26 -> 5_Mark_26_00_R_46.00_2025_06_02-20_19_12.fits
-            maxima = [np.float64(63744.0), np.float64(62765.0), np.float64(59242.0), np.float64(58110.0)]
+            central maxima = [62765, 35744, 35703, 31018]
 [SATURATED] Mark_26 -> 5_Mark_26_01_R_46.00_2025_06_02-20_20_08.fits
-            maxima = [np.float64(64143.0), np.float64(63055.0), np.float64(62125.0), np.float64(58844.0)]
+            central maxima = [63055, 38753, 38114, 31482]
 [SATURATED] Mark_26 -> 5_Mark_26_02_R_46.00_2025_06_02-20_21_05.fits
-            maxima = [np.float64(65128.0), np.float64(63263.0), np.float64(62280.0), np.float64(61431.0)]
+            central maxima = [63263, 40517, 37772, 33894]
 [SATURATED] Mark_26 -> 5_Mark_26_03_R_46.00_2025_06_02-20_22_01.fits
-            maxima = [np.float64(64516.0), np.float64(63558.0), np.float64(61783.0), np.float64(61500.0)]
+            central maxima = [63558, 39430, 37516, 35942]
 [SATURATED] Mark_26 -> 5_Mark_26_04_R_46.00_2025_06_02-20_22_57.fits
-            maxima = [np.float64(64270.0), np.float64(62978.0), np.float64(60323.0), np.float64(54538.0)]
+            central maxima = [62978, 34368, 33955, 33803]
 [SATURATED] Mark_26 -> 5_Mark_26_05_R_46.00_2025_06_02-20_23_54.fits
-            maxima = [np.float64(64247.0), np.float64(62953.0), np.float64(62182.0), np.float64(55955.0)]
+            central maxima = [62953, 36651, 36582, 32631]
 [SATURATED] Mark_26 -> 5_Mark_26_06_R_46.00_2025_06_02-20_24_50.fits
-            maxima = [np.float64(64045.0), np.float64(63943.0), np.float64(62191.0), np.float64(60307.0)]
+            central maxima = [63943, 37313, 35779, 35694]
 [SATURATED] Mark_26 -> 5_Mark_26_07_R_46.00_2025_06_02-20_25_47.fits
-            maxima = [np.float64(64487.0), np.float64(63971.0), np.float64(62524.0), np.float64(58041.0)]
+            central maxima = [63971, 37365, 36509, 36435]
 [SATURATED] Mark_26 -> 5_Mark_26_08_R_46.00_2025_06_02-20_26_43.fits
-            maxima = [np.float64(64402.0), np.float64(63182.0), np.float64(62367.0), np.float64(57703.0)]
+            central maxima = [63182, 37944, 37061, 33854]
 [SATURATED] Mark_26 -> 5_Mark_26_09_R_46.00_2025_06_02-20_27_39.fits
-            maxima = [np.float64(64221.0), np.float64(63813.0), np.float64(60991.0), np.float64(60488.0)]
+            central maxima = [63813, 37779, 37686, 34112]
 [FAILED_TO_FIND_4_SPOTS] Mark_261 -> Markkanen/Mark_261/2460431.289293981/36_Mark_261_08_R_12.00_2024_04_30-18_58_01.fits
 [FAILED_TO_FIND_4_SPOTS] Mark_261 -> Markkanen/Mark_261/2460431.289293981/36_Mark_261_09_R_12.00_2024_04_30-18_58_23.fits
 [SATURATED] Mark_26C -> 7_Mark_26_00_g_53.00_2025_06_02-21_02_23.fits
-            maxima = [np.float64(54076.0), np.float64(53321.0), np.float64(26734.0), np.float64(26219.0)]
+            central maxima = [54076, 26734, 26219, 26130]
 [SATURATED] Mark_26C -> 7_Mark_26_01_g_53.00_2025_06_02-21_03_26.fits
-            maxima = [np.float64(51043.0), np.float64(49948.0), np.float64(24543.0), np.float64(24066.0)]
+            central maxima = [51043, 24543, 24066, 23795]
 [SATURATED] Mark_26C -> 7_Mark_26_04_g_53.00_2025_06_02-21_06_36.fits
-            maxima = [np.float64(50139.0), np.float64(48552.0), np.float64(23144.0), np.float64(23115.0)]
+            central maxima = [50139, 23144, 23115, 22781]
 [SATURATED] Mark_26C -> 7_Mark_26_05_g_53.00_2025_06_02-21_07_39.fits
-            maxima = [np.float64(52495.0), np.float64(51261.0), np.float64(25711.0), np.float64(25220.0)]
+            central maxima = [51261, 25711, 25220, 25207]
 [SATURATED] Mark_26C -> 7_Mark_26_06_g_53.00_2025_06_02-21_08_42.fits
-            maxima = [np.float64(50445.0), np.float64(49141.0), np.float64(24907.0), np.float64(24856.0)]
+            central maxima = [50445, 24907, 24856, 24218]
 [SATURATED] Mark_26C -> 7_Mark_26_07_g_53.00_2025_06_02-21_09_45.fits
-            maxima = [np.float64(52496.0), np.float64(51221.0), np.float64(26821.0), np.float64(24733.0)]
+            central maxima = [51221, 26821, 24733, 24247]
 [SATURATED] Mark_26D -> 8_Mark_26_00_i_40.00_2025_06_02-20_30_06.fits
-            maxima = [np.float64(61260.0), np.float64(59838.0), np.float64(59044.0), np.float64(58840.0)]
-[SATURATED] Mark_26D -> 8_Mark_26_01_i_40.00_2025_06_02-20_30_56.fits
-            maxima = [np.float64(60565.0), np.float64(60229.0), np.float64(59088.0), np.float64(50945.0)]
+            central maxima = [55007, 25227, 24356, 23209]
 [SATURATED] Mark_26D -> 8_Mark_26_02_i_40.00_2025_06_02-20_31_46.fits
-            maxima = [np.float64(63553.0), np.float64(62152.0), np.float64(62045.0), np.float64(56365.0)]
+            central maxima = [56365, 26664, 24650, 23518]
 [SATURATED] Mark_26D -> 8_Mark_26_03_i_40.00_2025_06_02-20_32_36.fits
-            maxima = [np.float64(61183.0), np.float64(59783.0), np.float64(58735.0), np.float64(54653.0)]
-[SATURATED] Mark_26D -> 8_Mark_26_04_i_40.00_2025_06_02-20_33_26.fits
-            maxima = [np.float64(61555.0), np.float64(61051.0), np.float64(57952.0), np.float64(52960.0)]
+            central maxima = [52613, 24855, 23963, 22503]
 [SATURATED] Mark_26D -> 8_Mark_26_05_i_40.00_2025_06_02-20_34_16.fits
-            maxima = [np.float64(63461.0), np.float64(62244.0), np.float64(62071.0), np.float64(54699.0)]
+            central maxima = [54070, 27119, 25333, 25027]
 [SATURATED] Mark_26D -> 8_Mark_26_06_i_40.00_2025_06_02-20_35_06.fits
-            maxima = [np.float64(60859.0), np.float64(59926.0), np.float64(58504.0), np.float64(56026.0)]
+            central maxima = [55630, 26051, 22705, 22308]
 [SATURATED] Mark_26D -> 8_Mark_26_07_i_40.00_2025_06_02-20_35_56.fits
-            maxima = [np.float64(63064.0), np.float64(61039.0), np.float64(59770.0), np.float64(56793.0)]
+            central maxima = [53557, 26841, 22642, 22299]
 [SATURATED] Mark_26D -> 8_Mark_26_08_i_40.00_2025_06_02-20_36_46.fits
-            maxima = [np.float64(60150.0), np.float64(59875.0), np.float64(59265.0), np.float64(56486.0)]
-[SATURATED] Mark_26D -> 8_Mark_26_09_i_40.00_2025_06_02-20_37_36.fits
-            maxima = [np.float64(57966.0), np.float64(57922.0), np.float64(56545.0), np.float64(50495.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_00_R_15.00_2024_05_30-20_02_11.fits
-            maxima = [np.float64(61620.0), np.float64(61351.0), np.float64(49899.0), np.float64(40319.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_01_R_15.00_2024_05_30-20_02_36.fits
-            maxima = [np.float64(60974.0), np.float64(60714.0), np.float64(44176.0), np.float64(35964.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_02_R_15.00_2024_05_30-20_03_01.fits
-            maxima = [np.float64(61366.0), np.float64(60857.0), np.float64(44966.0), np.float64(36794.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_03_R_15.00_2024_05_30-20_03_26.fits
-            maxima = [np.float64(61642.0), np.float64(61558.0), np.float64(46224.0), np.float64(41588.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_04_R_15.00_2024_05_30-20_03_51.fits
-            maxima = [np.float64(61917.0), np.float64(61835.0), np.float64(50953.0), np.float64(42912.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_05_R_15.00_2024_05_30-20_04_16.fits
-            maxima = [np.float64(61800.0), np.float64(61630.0), np.float64(47077.0), np.float64(39467.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_06_R_15.00_2024_05_30-20_04_41.fits
-            maxima = [np.float64(61405.0), np.float64(60573.0), np.float64(42588.0), np.float64(37864.0)]
-[SATURATED] Mark_272 -> 28_Mark_272_07_R_15.00_2024_05_30-20_05_06.fits
-            maxima = [np.float64(61530.0), np.float64(61525.0), np.float64(45924.0), np.float64(39333.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_00_R_18.00_2024_05_29-20_44_03.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(51723.0), np.float64(24130.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_01_R_18.00_2024_05_29-20_44_31.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(42605.0), np.float64(22286.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_02_R_18.00_2024_05_29-20_44_59.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(48014.0), np.float64(27382.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_03_R_18.00_2024_05_29-20_45_27.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(48984.0), np.float64(25660.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_04_R_18.00_2024_05_29-20_45_55.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(53943.0), np.float64(28756.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_05_R_18.00_2024_05_29-20_46_23.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(60192.0), np.float64(31203.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_06_R_18.00_2024_05_29-20_46_51.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(61525.0), np.float64(33767.0)]
-[SATURATED] Mark_290 -> 36_Mark_290_07_R_18.00_2024_05_29-20_47_19.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(51377.0), np.float64(28302.0)]
+            central maxima = [56415, 27071, 23408, 22800]
+[FAILED_TO_FIND_4_SPOTS] Mark_297 -> Markkanen/Mark_297/2460431.5164178237/37_Mark_297_06_R_20.00_2024_05_01-00_24_31.fits
 [FAILED_TO_FIND_4_SPOTS] Mark_30 -> Markkanen/Mark_30/2460432.380173611/16_Mark_30_12_R_25.00_2024_05_01-21_11_01.fits
-[SATURATED] Mark_33 -> 36_Mark_33_00_R_20.00_2024_05_30-21_59_52.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(58841.0), np.float64(46561.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_01_R_20.00_2024_05_30-22_00_22.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(57922.0), np.float64(46988.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_02_R_20.00_2024_05_30-22_00_52.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(54810.0), np.float64(44340.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_03_R_20.00_2024_05_30-22_01_22.fits
-            maxima = [np.float64(64479.0), np.float64(64376.0), np.float64(31215.0), np.float64(26981.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_04_R_20.00_2024_05_30-22_01_53.fits
-            maxima = [np.float64(63848.0), np.float64(63790.0), np.float64(27007.0), np.float64(22266.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_05_R_20.00_2024_05_30-22_02_23.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(45693.0), np.float64(39345.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_06_R_20.00_2024_05_30-22_02_53.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(51085.0), np.float64(41677.0)]
-[SATURATED] Mark_33 -> 36_Mark_33_07_R_20.00_2024_05_30-22_03_23.fits
-            maxima = [np.float64(65535.0), np.float64(65503.0), np.float64(48855.0), np.float64(41284.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_00_R_15.00_2024_05_07-19_25_25.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64966.0), np.float64(64867.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_01_R_15.00_2024_05_07-19_25_50.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(64955.0), np.float64(64926.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_02_R_15.00_2024_05_07-19_26_15.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65234.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_03_R_15.00_2024_05_07-19_26_40.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65005.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_04_R_15.00_2024_05_07-19_27_05.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65045.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_05_R_15.00_2024_05_07-19_27_30.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65388.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_06_R_15.00_2024_05_07-19_27_55.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65084.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_07_R_15.00_2024_05_07-19_28_20.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65332.0)]
-[SATURATED] Mark_35 -> 7_Mark_35_08_R_15.00_2024_05_07-19_28_45.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65413.0)]
-[SATURATED] Mark_41 -> 7_Mark_41_05_R_17.00_2024_05_28-19_33_07.fits
-            maxima = [np.float64(64860.0), np.float64(4435.0), np.float64(4367.0), np.float64(3631.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_00_R_13.00_2024_05_07-22_34_58.fits
-            maxima = [np.float64(65017.0), np.float64(64741.0), np.float64(41802.0), np.float64(33225.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_01_R_13.00_2024_05_07-22_35_21.fits
-            maxima = [np.float64(65068.0), np.float64(64902.0), np.float64(45484.0), np.float64(36272.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_02_R_13.00_2024_05_07-22_35_44.fits
-            maxima = [np.float64(64740.0), np.float64(64216.0), np.float64(38429.0), np.float64(31564.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_03_R_13.00_2024_05_07-22_36_07.fits
-            maxima = [np.float64(65015.0), np.float64(64674.0), np.float64(50935.0), np.float64(43760.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_04_R_13.00_2024_05_07-22_36_30.fits
-            maxima = [np.float64(65016.0), np.float64(64706.0), np.float64(39848.0), np.float64(32262.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_05_R_13.00_2024_05_07-22_36_53.fits
-            maxima = [np.float64(64942.0), np.float64(64824.0), np.float64(36893.0), np.float64(34634.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_06_R_13.00_2024_05_07-22_37_16.fits
-            maxima = [np.float64(64937.0), np.float64(64702.0), np.float64(41189.0), np.float64(34500.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_07_R_13.00_2024_05_07-22_37_39.fits
-            maxima = [np.float64(64855.0), np.float64(64831.0), np.float64(37633.0), np.float64(36167.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_08_R_13.00_2024_05_07-22_38_02.fits
-            maxima = [np.float64(64898.0), np.float64(64730.0), np.float64(38556.0), np.float64(35675.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_09_R_13.00_2024_05_07-22_38_46.fits
-            maxima = [np.float64(64555.0), np.float64(64458.0), np.float64(34991.0), np.float64(29709.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_10_R_13.00_2024_05_07-22_39_09.fits
-            maxima = [np.float64(64545.0), np.float64(64294.0), np.float64(34431.0), np.float64(30803.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_11_R_13.00_2024_05_07-22_39_32.fits
-            maxima = [np.float64(64745.0), np.float64(64565.0), np.float64(37774.0), np.float64(33699.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_12_R_13.00_2024_05_07-22_39_55.fits
-            maxima = [np.float64(64651.0), np.float64(64280.0), np.float64(37629.0), np.float64(32867.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_13_R_13.00_2024_05_07-22_40_18.fits
-            maxima = [np.float64(64660.0), np.float64(64511.0), np.float64(42019.0), np.float64(37426.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_14_R_13.00_2024_05_07-22_40_41.fits
-            maxima = [np.float64(64967.0), np.float64(64762.0), np.float64(39076.0), np.float64(34132.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_15_R_13.00_2024_05_07-22_41_04.fits
-            maxima = [np.float64(63692.0), np.float64(63641.0), np.float64(33322.0), np.float64(30873.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_16_R_13.00_2024_05_07-22_41_27.fits
-            maxima = [np.float64(64634.0), np.float64(64375.0), np.float64(42175.0), np.float64(36695.0)]
-[SATURATED] Mark_44 -> 25_Mark_44_17_R_13.00_2024_05_07-22_41_50.fits
-            maxima = [np.float64(64634.0), np.float64(64186.0), np.float64(41603.0), np.float64(34546.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_00_R_20.00_2024_05_30-19_29_48.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_01_R_20.00_2024_05_30-19_30_18.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_02_R_20.00_2024_05_30-19_30_48.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_03_R_20.00_2024_05_30-19_31_18.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_04_R_20.00_2024_05_30-19_31_48.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_05_R_20.00_2024_05_30-19_32_18.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_06_R_20.00_2024_05_30-19_32_48.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_07_R_20.00_2024_05_30-19_33_18.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_08_R_20.00_2024_05_30-19_33_51.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_09_R_20.00_2024_05_30-19_34_21.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_47 -> 14_Mark_47_10_R_20.00_2024_05_30-19_34_51.fits
-            maxima = [np.float64(65535.0), np.float64(65535.0), np.float64(65535.0), np.float64(65535.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_00_R_16.00_2024_04_25-22_23_33.fits
-            maxima = [np.float64(63250.0), np.float64(63222.0), np.float64(63215.0), np.float64(63166.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_01_R_16.00_2024_04_25-22_23_59.fits
-            maxima = [np.float64(63267.0), np.float64(63247.0), np.float64(63240.0), np.float64(63209.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_02_R_16.00_2024_04_25-22_24_25.fits
-            maxima = [np.float64(63285.0), np.float64(63258.0), np.float64(63249.0), np.float64(63165.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_03_R_16.00_2024_04_25-22_24_51.fits
-            maxima = [np.float64(63298.0), np.float64(63256.0), np.float64(63244.0), np.float64(63193.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_04_R_16.00_2024_04_25-22_25_17.fits
-            maxima = [np.float64(63285.0), np.float64(63264.0), np.float64(63257.0), np.float64(63220.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_05_R_16.00_2024_04_25-22_25_43.fits
-            maxima = [np.float64(63282.0), np.float64(63279.0), np.float64(63238.0), np.float64(63183.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_06_R_16.00_2024_04_25-22_26_09.fits
-            maxima = [np.float64(63293.0), np.float64(63276.0), np.float64(63238.0), np.float64(63226.0)]
-[SATURATED] Mark_5 -> 7_Mark_5_07_R_16.00_2024_04_25-22_26_35.fits
-            maxima = [np.float64(63287.0), np.float64(63273.0), np.float64(63233.0), np.float64(63229.0)]
-[SATURATED] Mark_70 -> 10_Mark_70_08_R_10.00_2024_05_28-19_13_19.fits
-            maxima = [np.float64(58785.0), np.float64(5327.0), np.float64(5196.0), np.float64(4295.0)]
-[SATURATED] Mark_9 -> 9_Mark_9_05_R_15.00_2024_04_25-22_08_25.fits
-            maxima = [np.float64(62038.0), np.float64(61785.0), np.float64(55607.0), np.float64(55249.0)]
+[FAILED_TO_FIND_4_SPOTS] Mark_4 -> Markkanen/Mark_4/2460426.439988426/6_Mark_4_00_R_18.00_2024_04_25-22_31_57.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_4 -> Markkanen/Mark_4/2460426.439988426/6_Mark_4_01_R_18.00_2024_04_25-22_32_25.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_4 -> Markkanen/Mark_4/2460426.439988426/6_Mark_4_04_R_18.00_2024_04_25-22_33_49.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_00_R_8.00_2024_04_25-20_34_02.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_01_R_8.00_2024_04_25-20_34_20.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_02_R_8.00_2024_04_25-20_34_38.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_03_R_8.00_2024_04_25-20_35_20.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_04_R_8.00_2024_04_25-20_35_38.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_05_R_8.00_2024_04_25-20_35_56.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_43 -> Markkanen/Mark_43/2460426.35787037/19_Mark_43_06_R_8.00_2024_04_25-20_36_29.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_8 -> Markkanen/Mark_8/2460426.4182812497/8_Mark_8_04_R_18.00_2024_04_25-22_02_40.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_9 -> Markkanen/Mark_9/2460426.4219560185/9_Mark_9_00_R_15.00_2024_04_25-22_05_59.fits
+[FAILED_TO_FIND_4_SPOTS] Mark_9 -> Markkanen/Mark_9/2460426.4219560185/9_Mark_9_06_R_15.00_2024_04_25-22_09_13.fits
+
