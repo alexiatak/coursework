@@ -1,10 +1,22 @@
 
+========================== 16/03/26 ==========================
+
 R-band
-1. Finish processing R-band 146 sources
-2. Correct the measurements using instumental polarization data
-3. Find weighted mean polzarization values
-4. Translate EVPA from equatorial to galactic coordinates
-5. Make sky plo wih line segments showing polarization data
+1. DONE Finish processing all R-band observations
+2. DONE Correct the measurements using instrumental polarization data
+3. DONE Find weighted mean polarization values for stars with multiple measurements
+4. Add external data from https://ui.adsabs.harvard.edu/abs/2025ApJS..276...15P/abstract
+   See notebook in coursework/99_scripts_examples/in_agglomer/ (install pygplates and healpy with python -m pip install healpy ; python -m pip install pygplates)
+   There are many useless things there. In last two cells there is the actual check whether a star from the compilation is
+   in a predefined polygon on the sky.
+   Add the catalogue of 104 stars from this collection to our data in a separate file in coursework/0_data/
+   The later include it in the plots/analysis but always mark with different symbols/colors.
+5. Make plots like coursework/99_scripts_examples/sky_plot/skymap1.png with our stars shown  by points or (line segments) coursework/99_scripts_examples/sky_plot/skymap2.png. skymap1.png is roughly centered at our data.
+   We need to show the scale that our data cover ~ 25 x 5 deg and location on the sky.
+   You can use for example this library https://github.com/astronoray/constellation_figures
+   Plot our data and collection from 4. with different symbols.
+6. Overplot polarization segments on top of 350 GHz Zodiacal Light Subtracted map https://irsa.ipac.caltech.edu/data/Planck/release_1/all-sky-maps/index.html
+   as it is done for in ./coursework/1_sky_plot/
 
 
 
@@ -12,5 +24,6 @@ Multiband
 1. Process both standars and multiband data for tne three Mark_* stars.
 2. Find instrumenal polarization in each band and correct Mark_* data for it
 3. Plot data + Serkowski curve fit for the three stars
+
 
 
