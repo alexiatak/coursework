@@ -9,6 +9,7 @@ from astropy import units as u
 from pylab import cm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.lines import Line2D
 import pickle
 import pygplates
 import random
@@ -69,7 +70,7 @@ for line in fop.readlines():
         targ_done_b.append(c.galactic.b.degree)
 fop.close()
 
-f= plt.figure(figsize=(12,12))
+#f= plt.figure(figsize=(12,12))
 
 
 hp.gnomview(diff_map, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
@@ -223,6 +224,14 @@ df_merged = pd.merge(df_dat, df_csv_selected, on="Name", how="left")
 #save to CSV
 df_merged.to_csv("merged_output.csv", index=False)
 
+
+# external selected stars
+df_ext = pd.read_csv("../0_extern_data/external_panopoulou_expanded_polygon.csv")
+ext_ra = df_ext["RA"].tolist()
+ext_dec = df_ext["DEC"].tolist()
+ext_l = df_ext["l"].tolist()
+ext_b = df_ext["b"].tolist()
+
 ########################################################
 
 def coordinates_os_stars():
@@ -263,10 +272,9 @@ stars = coordinates_os_stars()
 
 
 
-
 def segments_on_map(fitsfile, ra, dec, Ps, pas, scale = 1000):
         '''
-        Plot polarization segments on fits file.
+        Plot polarization segments and external selected stars on a fits map.
         Input: 
         fitsfile: string, name of fits file
         ra: list of ra
@@ -277,22 +285,17 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas, scale = 1000):
         coord: coordinate system of fits image
         scale: float/int, determines how long the segments will be in pixels
         '''
-        # fig = aplpy.FITSFigure(fitsfile,figsize = (9,9))
-        # fig.show_grayscale(invert=True)
+
         mapread = hp.read_map(fitsfile)
-        fig = plt.figure(figsize=(12,12))
+        #fig = plt.figure(figsize=(12,12))
         hp.gnomview(mapread, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
-                    xsize=150, ysize=150, fig=1,
+                    xsize=150, ysize=150, fig=2,
                     coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
         hp.graticule()
-        # fig.add_grid()
-        # fig.grid._grid._linewidths = (0.4,)
-        # fig.grid.show()
         
-        # linelist1 = []
-        # kukloi_ra, kukloi_dec, kukloi_polosi = [], [], []
+
+        #our polarization segments
         for iv in range(len(pas)):
-            # xpix,ypix=fig.world2pixel(ra[iv],dec[iv])
             c = SkyCoord(ra[iv], dec[iv], unit="deg", frame="icrs")  # defaults to ICRS frame
             l = c.galactic.l.degree
             b = c.galactic.b.degree
@@ -302,21 +305,58 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas, scale = 1000):
                b+linelength_half*np.cos(pas[iv])]
             ls=[l+linelength_half*np.sin(pas[iv]),
                l-linelength_half*np.sin(pas[iv])]
-            # x_world,y_world=fig.pixel2world([x[0],x[1]],[y[0],y[1]])
-            # line=np.array([x_world,y_world])
-            # linelist1.append(line)
-            hp.projplot(ls, bs, c='g', lonlat=True, coord='G')
+               
+            #hp.projplot(ls, bs, c='lime', lonlat=True, coord='G')      #uncomment this when you
+                                                                        #are not searching an outlier
+                                                                        
+                                                                        
+            """searching an outlier marking it red on our plot, for ex Mark_305"""
             
-        # fig.show_lines(linelist1[:-1], layer='line', color='r', linewidths=1.3)
-        # fig.show_lines([linelist1[-1]], layer='line1', color='cyan', linewidths=1.3)
-        #fig.show_ellipses([35.3125], [25.3], 0.09, 0.07, angle=17, layer='ellipse', color='g') 
+            star_name = df_merged.iloc[iv]["Name"]
+            
+            if star_name == "Mark_305":
+                hp.projplot(ls, bs, c='red', lw=3, lonlat=True, coord='G')
+            else:
+                hp.projplot(ls, bs, c='lime', lonlat=True, coord='G')
+
+            """  """
+
+        # external selected stars
+        if ext_l is not None and ext_b is not None:
+            hp.projscatter(ext_l, ext_b, marker='^', c='cyan', s=35, lonlat=True, coord='G')
+        legend_handles = [ Line2D([0], [0], color='lime', lw=2, label='Our polarization'),
+                          Line2D([0], [0], marker='^', color='cyan', linestyle='None',
+                                 markersize=8, label='External stars')]
+        plt.legend(handles=legend_handles, loc='lower left')
+
         plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
         plt.show()      
 
 fits.info("diff_ebv_gnilc_lenz.fits")
 eikona_fits = 'diff_ebv_gnilc_lenz.fits'
 
-ras_all, decs_all, Ps, angles = coordinates_os_stars()  
+ras_all, decs_all, Ps, angles = coordinates_os_stars() 
+
+
+# check for a possible outlier
+
+target_l = 249.53
+target_b = 73.75
+
+for i in range(len(ras_all)):
+    c = SkyCoord(ras_all[i], decs_all[i], unit="deg", frame="icrs")
+    l = c.galactic.l.degree
+    b = c.galactic.b.degree
+    
+    if abs(l - target_l) < 1 and abs(b - target_b) < 1:
+        print("OUTLIER:", df_merged.iloc[i]["Name"], l, b)
+        print(
+            f"OUTLIER: {df_merged.iloc[i]['Name']} "
+            f"l={l:.3f} b={b:.3f} "
+            f"P[%]={df_merged.iloc[i]['P[%]']:.3f} "
+            f"PA[deg]={df_merged.iloc[i]['PA[deg]']:.3f}")
+
+ 
 angles = np.array(angles)
 angles = np.radians(angles)
 ra = ras_all
@@ -324,7 +364,16 @@ dec = decs_all
 # Plot polarization segments on DSS 
 coordang = 0.
 pas_forplot = angles + coordang
-   
-segments_on_map( eikona_fits, ra, dec, Ps, pas_forplot, scale = 0.5 )
+
+segments_on_map(
+    eikona_fits,
+    ra,
+    dec,
+    Ps,
+    pas_forplot,
+    #ext_l=ext_l,
+    #ext_b=ext_b,
+    scale=0.5
+)   
 #plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
 plt.show()
