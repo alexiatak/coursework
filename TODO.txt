@@ -17,6 +17,7 @@ R-band
    Plot our data and collection from 4. with different symbols.
 6. Overplot polarization segments on top of 350 GHz Zodiacal Light Subtracted map https://irsa.ipac.caltech.edu/data/Planck/release_1/all-sky-maps/index.html
    as it is done for in ./coursework/1_sky_plot/
+7. Make a plot similar fig. 8 in https://arxiv.org/pdf/2510.25911 using our data + Panopoulou+25.
 
 
 
