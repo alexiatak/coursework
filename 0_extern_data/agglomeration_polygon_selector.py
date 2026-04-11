@@ -9,8 +9,8 @@ Pipeline
 2. Convert RA/Dec -> Galactic coordinates (l, b)
 3. Keep only stars inside a predefined sky polygon
 4. Save the selected external stars to a CSV
-5. Read my own observations from merged_output.csv
-6. Crossmatch: for each of my stars find the nearest Panopoulou match
+5. Read your own observations from merged_output.csv
+6. Crossmatch: for each of YOUR stars find the nearest Panopoulou match
 7. Save the matched pairs to a second CSV
 8. Optionally make a diagnostic plot
 
@@ -80,10 +80,9 @@ EXPANDED_POLYGON: List[Tuple[float, float]] = [
     (353.0, 78.5),
 ]
 
-
 # Panopoulou catalog — required columns (exact header spelling)
 PANOPOULOU_REQUIRED = [
-    "EDR3_source_id",   
+    "EDR3_source_id",
     "starID",
     "RA",
     "Dec",
@@ -91,13 +90,13 @@ PANOPOULOU_REQUIRED = [
     "e_p",
     "evpa",
     "e_evpa",
+    "FilterID",   # check the filter
 ]
 
 PANOPOULOU_DIST_COLS = [
     "r_med_geo", "r_lo_geo", "r_hi_geo",
     "r_med_photogeo", "r_lo_photogeo", "r_hi_photogeo",
 ]
-
 
 @dataclass
 class SelectionResult:
@@ -137,7 +136,7 @@ def load_panopoulou_catalog(path: Path) -> pd.DataFrame:
 
 
 
-def load_merged_catalog(path: Path) -> pd.DataFrame:            #load your own observations
+def load_merged_catalog(path: Path) -> pd.DataFrame:
     """
     Load merged_output.csv using named columns 
 
@@ -171,7 +170,7 @@ def load_merged_catalog(path: Path) -> pd.DataFrame:            #load your own o
 
 
 # coordinate conversion and spatial filtering
-def add_galactic_coordinates(df: pd.DataFrame) -> pd.DataFrame:                 
+def add_galactic_coordinates(df: pd.DataFrame) -> pd.DataFrame:
     """Append Galactic longitude (l) and latitude (b) columns in degrees."""
     coords = SkyCoord(
         ra=df["RA"].to_numpy() * u.deg,
@@ -187,7 +186,7 @@ def coarse_region_cut(df: pd.DataFrame) -> pd.DataFrame:
     """
     Fast rectangular pre-filter: 220° < l < 360°, 65° < b < 89°.
     Mirrors the notebook's initial box cut before the polygon test.
-
+    Note: upper bound is 360.0 (not 359.99) so no stars are clipped.
     """
     mask = (
         (df["l"] > 220.0) & (df["l"] < 360.0)
@@ -235,7 +234,7 @@ def crossmatch_with_observed(
 
     Parameters----->
     external_df    : Panopoulou stars inside the polygon
-    observed_df    : my merged_output stars
+    observed_df    : your merged_output stars
     max_sep_arcsec : maximum on-sky separation to count as a match
 
     Returns------->
@@ -288,7 +287,7 @@ def save_selection(df: pd.DataFrame, output_path: Path) -> None:
     """Save the full polygon selection with polarization and distance columns."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cols = (
-        ["GID", "starID", "RA", "DEC", "l", "b", "p", "e_p", "evpa", "e_evpa", "origin"]
+        ["GID", "starID", "RA", "DEC", "l", "b", "p", "e_p", "evpa", "e_evpa","FilterID", "origin"]
         + [c for c in PANOPOULOU_DIST_COLS if c in df.columns]
     )
     df.to_csv(output_path, index=False, columns=[c for c in cols if c in df.columns])
@@ -424,10 +423,14 @@ def main() -> None:
     args = parse_args()
     polygon = choose_polygon(args.polygon)
 
-    
+
     print(f"Loading Panopoulou catalog: {args.catalog}")
     catalog = load_panopoulou_catalog(args.catalog)
     print(f"  {len(catalog)} stars loaded")
+
+    #  KEEP ONLY FilterID = 0 and 20 (exclude 3)
+    catalog = catalog[catalog["FilterID"].isin([0, 20])].copy()
+    print(f"  {len(catalog)} stars after filter selection")
 
     catalog = add_galactic_coordinates(catalog)
     catalog = coarse_region_cut(catalog)
@@ -439,7 +442,6 @@ def main() -> None:
     save_selection(result.selected, args.output)
     print(f"Polygon selection saved → {args.output}")
 
-   
     print(f"\nLoading observed catalog: {args.merged_catalog}")
     observed = load_merged_catalog(args.merged_catalog)
     print(f"  {len(observed)} observed stars loaded")
@@ -465,7 +467,6 @@ def main() -> None:
     else:
         print("  No crossmatches found — check --max-sep-arcsec or sky coverage.")
 
-    
     if args.plot:
         quick_plot(result.selected, result.polygon, diff_map_path=args.diff_map)
 
