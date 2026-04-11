@@ -28,7 +28,7 @@ SHOW_EXTERNAL_CATALOG = True        #   set to True to overlay the external Pano
 
 
 # Path to the external catalog CSV produced by agglomeration_polygon_selector.py
-EXTERNAL_CATALOG_PATH = "../0_extern_data/external_panopoulou_expanded_polygon.csv"
+EXTERNAL_CATALOG_PATH = "../0_data/R/external_panopoulou_expanded_polygon.csv"
 
 
 
@@ -73,7 +73,7 @@ for line in fop.readlines():
         targ_done_b.append(c.galactic.b.degree)
 fop.close()
 
-f = plt.figure(figsize=(12,12))
+#f = plt.figure(figsize=(12,12))
 
 hp.gnomview(diff_map, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
             xsize=150, ysize=150, fig=1,
@@ -84,7 +84,7 @@ hp.projscatter(targ_all_l, targ_all_b, marker='.', c='g', lonlat=True, coord='G'
 hp.projscatter(targ_done_l, targ_done_b, marker='.', c='k', lonlat=True, coord='G', label='observed')
 plt.legend()
 plt.savefig('mark_observed_targets.png')
-plt.clf()
+plt.close(1)
 
 
 def appenzeller(l, b, evpa):
@@ -104,7 +104,7 @@ def appenzeller(l, b, evpa):
     Dt = np.arctan2(np.sin(np.radians(lp - targ_done_l)),
                     (np.cos(np.radians(targ_done_b)) * np.tan(np.radians(bp)) -
                      np.cos(np.radians(lp - targ_done_l)) * np.sin(np.radians(targ_done_b))))
-    return evpa + Dt
+    return evpa + np.degrees(Dt)   #fixed (add degrees with degrees not rad)
 
 
 ################################
@@ -172,17 +172,17 @@ class Obs():
             return np.nan
         return res.x[0]
 
-class Stand():
-    def __init__(self, st):
-        self.name = st
-        stand = stand_pol.STANDARDS[self.name]
-        self.PD    = ufloat(stand.PD / 100., stand.PDerr / 100.)
-        self.PA    = ufloat(stand.PA, stand.PAerr)
-        self.calcQU()
+# class Stand():
+    # def __init__(self, st):
+        # self.name = st
+        # stand = stand_pol.STANDARDS[self.name]
+        # self.PD    = ufloat(stand.PD / 100., stand.PDerr / 100.)
+        # self.PA    = ufloat(stand.PA, stand.PAerr)
+        # self.calcQU()
 
-    def calcQU(self):
-        self.q = self.PD * umath.cos(2 * umath.radians(self.PA))
-        self.u = self.PD * umath.sin(2 * umath.radians(self.PA))
+    # def calcQU(self):
+        # self.q = self.PD * umath.cos(2 * umath.radians(self.PA))
+        # self.u = self.PD * umath.sin(2 * umath.radians(self.PA))
 
 
 ##################
@@ -273,7 +273,32 @@ def coordinates_external_stars(catalog_path=EXTERNAL_CATALOG_PATH):
     print(f"[external catalog] loaded {len(ra)} stars with valid p & evpa")
     return ra, dec, Ps, angles
 
+def galactic_segment_endpoints(l_deg, b_deg, pa_rad, half_length_deg):
+    """
+    Build segment endpoints on the sphere in Galactic coordinates.
 
+    Parameters
+    ----------
+    l_deg, b_deg : float
+        Galactic longitude and latitude of the star (deg)
+    pa_rad : float
+        Galactic position angle in radians
+    half_length_deg : float
+        Half-length of segment in degrees
+
+    Returns
+    -------
+    ls, bs : lists
+        Endpoint Galactic coordinates in degrees
+    """
+    center = SkyCoord(l=l_deg*u.deg, b=b_deg*u.deg, frame="galactic")
+
+    pa_deg = np.degrees(pa_rad)
+
+    p1 = center.directional_offset_by(pa_deg*u.deg, half_length_deg*u.deg)
+    p2 = center.directional_offset_by((pa_deg + 180.0)*u.deg, half_length_deg*u.deg)
+
+    return [p1.l.deg, p2.l.deg], [p1.b.deg, p2.b.deg]
 
 def segments_on_map(fitsfile, ra, dec, Ps, pas,
                     scale=1000,
@@ -301,9 +326,9 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
         ext_scale = scale
 
     mapread = hp.read_map(fitsfile)
-    fig = plt.figure(figsize=(12, 12))
+    #fig = plt.figure(figsize=(12, 12))
     hp.gnomview(mapread, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
-                xsize=150, ysize=150, fig=1,
+                xsize=150, ysize=150, fig=2,
                 coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
     hp.graticule()
 
@@ -313,10 +338,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
         l = c.galactic.l.degree
         b = c.galactic.b.degree
         linelength_half = scale * Ps[iv]
-        bs = [b - linelength_half * np.cos(pas[iv]),
-              b + linelength_half * np.cos(pas[iv])]
-        ls = [l + linelength_half * np.sin(pas[iv]),
-              l - linelength_half * np.sin(pas[iv])]
+        ls, bs = galactic_segment_endpoints(l, b, pas[iv], linelength_half)
         hp.projplot(ls, bs, c='g', lonlat=True, coord='G',
                     label='My stars' if iv == 0 else None)
 
@@ -330,10 +352,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
             l = c.galactic.l.degree
             b = c.galactic.b.degree
             linelength_half = ext_scale * ext_Ps[iv]
-            bs = [b - linelength_half * np.cos(ext_pas[iv]),
-                  b + linelength_half * np.cos(ext_pas[iv])]
-            ls = [l + linelength_half * np.sin(ext_pas[iv]),
-                  l - linelength_half * np.sin(ext_pas[iv])]
+            ls, bs = galactic_segment_endpoints(l, b, ext_pas[iv], linelength_half)
             hp.projplot(ls, bs, c='cyan', lonlat=True, coord='G',
                         label='Panopoulou+2025' if iv == 0 else None)
 
@@ -349,7 +368,9 @@ eikona_fits = 'diff_ebv_gnilc_lenz.fits'
 ras_all, decs_all, Ps, angles = coordinates_os_stars()
 angles = np.array(angles)
 angles = np.radians(angles)
+#print(angles[0])
 pas_forplot = angles + 0.   # coordang = 0
+#pas_forplot = angles + np.radians(90.0)
 
 # ── external stars (loaded only when the toggle is on) ───────────────────────
 ext_ra = ext_dec = ext_Ps_arr = ext_pas_forplot = None
@@ -366,7 +387,7 @@ segments_on_map(
     scale=0.5,
     ext_ra=ext_ra, ext_dec=ext_dec,
     ext_Ps=ext_Ps_arr, ext_pas=ext_pas_forplot,
-    ext_scale=2.0,      # adjust if external segments look too long/short
+    ext_scale=1.0,      # adjust if external segments look too long/short
 )
 
 plt.show()
