@@ -1,0 +1,31 @@
+import healpy as hp
+import matplotlib.pyplot as plt
+import os
+
+out_dir = "sanity-checks"
+os.makedirs(out_dir, exist_ok=True)
+
+I = hp.read_map("planck_353_I_smoothed20arcmin_nside1024_nested.fits")
+Q = hp.read_map("planck_353_Q_smoothed20arcmin_nside1024_nested.fits")
+U = hp.read_map("planck_353_U_smoothed20arcmin_nside1024_nested.fits")
+
+# Full-sky views
+hp.mollview(I, norm='hist', title="Planck 353 GHz I", unit='K_CMB', cmap='inferno')
+hp.graticule()
+plt.savefig(os.path.join(out_dir, "check_I_fullsky.png"), dpi=120, bbox_inches='tight')
+plt.close()
+
+hp.mollview(Q, title="Planck 353 GHz Q", unit='K_CMB', cmap='RdBu_r',min=-1e-4, max=1e-4)
+hp.graticule()
+plt.savefig(os.path.join(out_dir,"check_Q_fullsky.png"), dpi=120, bbox_inches='tight')
+plt.close()
+
+hp.mollview(U, title="Planck 353 GHz U", unit='K_CMB', cmap='RdBu_r',min=-1e-4, max=1e-4)
+hp.graticule()
+plt.savefig(os.path.join(out_dir,"check_U_fullsky.png"), dpi=120, bbox_inches='tight')
+plt.close()
+
+print(f"saved 3 pngs to {os.path.abspath(out_dir)}")
+plt.show()
+
+
