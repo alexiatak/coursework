@@ -21,7 +21,7 @@ MAP_ROT_RA      = 185.0                            # equatorial centre used in r
 MAP_ROT_DEC     = 16.0
 
 # Turn to true to test the evpa 
-EVPA_TEST_MODE = True
+EVPA_TEST_MODE = False
 
 dust_map = hp.read_map(FITS_FILE)
 print(f"Map loaded: nside={hp.npix2nside(dust_map.size)}")
