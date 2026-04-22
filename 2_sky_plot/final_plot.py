@@ -30,6 +30,14 @@ SHOW_EXTERNAL_CATALOG = True        #   set to True to overlay the external Pano
 # Path to the external catalog CSV produced by agglomeration_polygon_selector.py
 EXTERNAL_CATALOG_PATH = "../0_data/R/external_panopoulou_expanded_polygon.csv"
 
+# Unified segment scale — same half-length per P% for every dataset
+SCALE_UNIFIED = 0.5
+
+# Reference-bar configuration 
+REF_P_PERCENT  = 1.0                            # reference polarization value
+REF_HALF_DEG   = SCALE_UNIFIED * REF_P_PERCENT  # half-length in degrees
+MAP_ROT_L      = 265.0                          # galactic centre used in rot
+MAP_ROT_B      = 80.0
 
 
 diff_map = hp.read_map("./diff_ebv_gnilc_lenz.fits")
@@ -75,7 +83,7 @@ fop.close()
 
 #f = plt.figure(figsize=(12,12))
 
-hp.gnomview(diff_map, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
+hp.gnomview(diff_map, rot=[MAP_ROT_L, MAP_ROT_B], min=-0.03, max=0.03, cmap='magma',
             xsize=150, ysize=150, fig=1,
             coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
 hp.graticule()
@@ -301,7 +309,7 @@ def galactic_segment_endpoints(l_deg, b_deg, pa_rad, half_length_deg):
     return [p1.l.deg, p2.l.deg], [p1.b.deg, p2.b.deg]
 
 def segments_on_map(fitsfile, ra, dec, Ps, pas,
-                    scale=1000,
+                    scale=SCALE_UNIFIED,
                     ext_ra=None, ext_dec=None, ext_Ps=None, ext_pas=None,
                     ext_scale=None):
     """
@@ -327,7 +335,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
 
     mapread = hp.read_map(fitsfile)
     #fig = plt.figure(figsize=(12, 12))
-    hp.gnomview(mapread, rot=[265, 80], min=-0.03, max=0.03, cmap='magma',
+    hp.gnomview(mapread, rot=[MAP_ROT_L, MAP_ROT_B], min=-0.03, max=0.03, cmap='magma',
                 xsize=150, ysize=150, fig=2,
                 coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
     hp.graticule()
@@ -355,6 +363,27 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
             ls, bs = galactic_segment_endpoints(l, b, ext_pas[iv], linelength_half)
             hp.projplot(ls, bs, c='cyan', lonlat=True, coord='G',
                         label='Panopoulou+2025' if iv == 0 else None)
+
+    # 1% reference bar
+    # length is the fraction of figure width that a 2*REF_HALF_DEG bar occupies
+    # at the map centre, where most stars sit:
+    #   map span across = xsize_px * reso_arcmin / 60  (degrees)
+    ref_full_deg  = 2.0 * REF_HALF_DEG
+    map_span_deg  = (150 * 11) / 60.0          # xsize=150, reso=11 arcmin
+    bar_frac      = ref_full_deg / map_span_deg
+    ax = plt.gca()
+    x0, y0 = 0.06, 0.08                        # lower-left corner of bar (axes frac)
+    # dark outline then white core for readability on magma
+    ax.plot([x0, x0 + bar_frac], [y0, y0],
+            color='black', lw=4.0,
+            transform=ax.transAxes, solid_capstyle='butt', zorder=10)
+    ax.plot([x0, x0 + bar_frac], [y0, y0],
+            color='white', lw=2.0,
+            transform=ax.transAxes, solid_capstyle='butt', zorder=11)
+    ax.text(x0 + bar_frac / 2.0, y0 - 0.025,
+            f"P = {REF_P_PERCENT:.0f}%",
+            color='white', fontsize=10, ha='center', va='top',
+            transform=ax.transAxes, zorder=11)
 
     plt.legend(loc='upper right')
     plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
@@ -384,10 +413,10 @@ if SHOW_EXTERNAL_CATALOG:
 segments_on_map(
     eikona_fits,
     ras_all, decs_all, Ps, pas_forplot,
-    scale=0.5,
+    scale=SCALE_UNIFIED,
     ext_ra=ext_ra, ext_dec=ext_dec,
     ext_Ps=ext_Ps_arr, ext_pas=ext_pas_forplot,
-    ext_scale=1.0,      # adjust if external segments look too long/short
+    ext_scale=SCALE_UNIFIED,
 )
 
 plt.show()
