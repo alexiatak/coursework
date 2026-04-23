@@ -85,7 +85,7 @@ fop.close()
 
 hp.gnomview(diff_map, rot=[MAP_ROT_L, MAP_ROT_B], min=-0.03, max=0.03, cmap='magma',
             xsize=150, ysize=150, fig=1,
-            coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
+            coord='G', reso=11, title="Markkanen cloud — galactic frame", unit="diff", format="%.2g")
 hp.graticule()
 
 hp.projscatter(targ_all_l, targ_all_b, marker='.', c='g', lonlat=True, coord='G', label='remaining')
@@ -337,7 +337,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
     #fig = plt.figure(figsize=(12, 12))
     hp.gnomview(mapread, rot=[MAP_ROT_L, MAP_ROT_B], min=-0.03, max=0.03, cmap='magma',
                 xsize=150, ysize=150, fig=2,
-                coord='G', reso=11, title="GnomView", unit="diff", format="%.2g")
+                coord='G', reso=11, title="Markkanen cloud — galactic frame", unit="diff", format="%.2g")
     hp.graticule()
 
     # ── my own stars (green) ────────────────────────────────────────────────
@@ -364,26 +364,33 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
             hp.projplot(ls, bs, c='cyan', lonlat=True, coord='G',
                         label='Panopoulou+2025' if iv == 0 else None)
 
-    # 1% reference bar
+    
+    # 1% reference bar, lower-left corner, parallel to x-axis 
     # length is the fraction of figure width that a 2*REF_HALF_DEG bar occupies
     # at the map centre, where most stars sit:
-    #   map span across = xsize_px * reso_arcmin / 60  (degrees)
-    ref_full_deg  = 2.0 * REF_HALF_DEG
-    map_span_deg  = (150 * 11) / 60.0          # xsize=150, reso=11 arcmin
-    bar_frac      = ref_full_deg / map_span_deg
+    # map span across = xsize_px * reso_arcmin / 60 (degrees)
+    ref_full_deg = 2.0 * REF_HALF_DEG
+    map_span_deg = (150 * 11) / 60.0 # xsize=150, reso=11 arcmin
+    fig_cur = plt.gcf()
     ax = plt.gca()
-    x0, y0 = 0.06, 0.08                        # lower-left corner of bar (axes frac)
+    # use figure coordinates: gnomview axes can be rotated vs the figure, so
+    # axes-fraction lines may tilt; figure-fraction keeps the bar horizontal
+    ax_bbox = ax.get_position()
+    bar_frac_axes = ref_full_deg / map_span_deg
+    x0_fig = ax_bbox.x0 + 0.08 * ax_bbox.width
+    y0_fig = ax_bbox.y0 + 0.10 * ax_bbox.height
+    bar_len_fig = bar_frac_axes * ax_bbox.width
     # dark outline then white core for readability on magma
-    ax.plot([x0, x0 + bar_frac], [y0, y0],
-            color='black', lw=4.0,
-            transform=ax.transAxes, solid_capstyle='butt', zorder=10)
-    ax.plot([x0, x0 + bar_frac], [y0, y0],
-            color='white', lw=2.0,
-            transform=ax.transAxes, solid_capstyle='butt', zorder=11)
-    ax.text(x0 + bar_frac / 2.0, y0 - 0.025,
-            f"P = {REF_P_PERCENT:.0f}%",
-            color='white', fontsize=10, ha='center', va='top',
-            transform=ax.transAxes, zorder=11)
+    fig_cur.lines.append(mpl.lines.Line2D([x0_fig, x0_fig + bar_len_fig], [y0_fig, y0_fig],
+        transform=fig_cur.transFigure, color='black', lw=4.0,
+        solid_capstyle='butt', zorder=10, figure=fig_cur))
+    fig_cur.lines.append(mpl.lines.Line2D([x0_fig, x0_fig + bar_len_fig], [y0_fig, y0_fig],
+        transform=fig_cur.transFigure, color='white', lw=2.0,solid_capstyle='butt', zorder=11, figure=fig_cur))
+    fig_cur.text(x0_fig + bar_len_fig / 2.0, y0_fig - 0.025,f"P = {REF_P_PERCENT:.0f}%",
+        color='white', fontsize=10, ha='center', va='top', zorder=11)
+
+
+
 
     plt.legend(loc='upper right')
     plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')

@@ -87,25 +87,27 @@ if len(df_ext_dot) > 0:
                    lonlat=True, coord="C",
                    marker="o", s=14, color="cyan", alpha=0.5)
 
-#  1% reference bar
-# length is the fraction of figure width that a 2*REF_HALF_DEG bar occupies
-# at the map centre:  map_span = xsize_px * reso_arcmin / 60  (degrees)
+# 1% reference bar, drawn in sky coords with the same great-circle
+# geometry as the star vectors, so it's directly comparable by eye
+# to any nearby vector (both get the same local projection stretch).
 ref_full_deg = 2.0 * REF_HALF_DEG
-map_span_deg = (300 * 6) / 60.0              # xsize=300, reso=6 arcmin
-bar_frac     = ref_full_deg / map_span_deg
-ax = plt.gca()
-x0, y0 = 0.06, 0.08                          # lower-left corner of bar (axes frac)
+map_span_deg = (300 * 6) / 60.0                    # xsize=300, reso=6 arcmin
 
-ax.plot([x0, x0 + bar_frac], [y0, y0],
-        color="black", lw=4.0,
-        transform=ax.transAxes, solid_capstyle="butt", zorder=10)
-ax.plot([x0, x0 + bar_frac], [y0, y0],
-        color="white", lw=2.0,
-        transform=ax.transAxes, solid_capstyle="butt", zorder=11)
-ax.text(x0 + bar_frac / 2.0, y0 - 0.025,
-        f"P = {REF_P_PERCENT:.0f}%",
-        color="white", fontsize=10, ha="center", va="top",
-        transform=ax.transAxes, zorder=11)
+# Anchor the bar in the lower-left of the field
+ref_ra  = MAP_ROT_RA  + 0.40 * map_span_deg / np.cos(np.radians(MAP_ROT_DEC - 0.40 * map_span_deg))
+ref_dec = MAP_ROT_DEC - 0.40 * map_span_deg
+
+# Horizontal bar: PA = 90 deg means aligned East-West on the sky.
+ref_ras, ref_decs = seg_endpoints(ref_ra, ref_dec, pa_deg=90.0, half_deg=REF_HALF_DEG)
+
+# Black outline first, white core on top.
+hp.projplot(ref_ras, ref_decs, lonlat=True, coord="C",
+            color="black", lw=5.0, zorder=10)
+hp.projplot(ref_ras, ref_decs, lonlat=True, coord="C",
+            color="white", lw=2.5, zorder=11)
+hp.projtext(ref_ra, ref_dec - 0.6, f"P = {REF_P_PERCENT:.0f}%",
+            lonlat=True, coord="C",
+            color="white", fontsize=10, ha="center", va="top", zorder=11)
 
 #  EVPA verification test mode
 if EVPA_TEST_MODE:
