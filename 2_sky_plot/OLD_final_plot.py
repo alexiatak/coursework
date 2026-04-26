@@ -203,30 +203,7 @@ df_csv = pd.read_csv("Markkanen_schedule_original.csv")
 df_csv.rename(columns={"#name": "Name"}, inplace=True)
 
 df_csv_selected = df_csv[["Name", "ra", "dec"]]
-
-# Strip the "_merged" suffix to recover the parent star name for the coordinate lookup.
-# "_merged" means the same star observed in multiple epochs and averaged,
-# so RA/Dec come from the parent (un-suffixed) entry in the schedule.
-df_dat["Name_lookup"] = df_dat["Name"].str.replace("_merged", "", regex=False)
-
-df_merged = pd.merge(
-    df_dat,
-    df_csv_selected,
-    left_on="Name_lookup",
-    right_on="Name",
-    how="left",
-    suffixes=("", "_sched"),
-)
-
-# Drop the helper columns; keep the original "_merged" name in df_merged["Name"]
-df_merged.drop(columns=["Name_lookup", "Name_sched"], inplace=True)
-
-# Sanity check: warn if any row still has missing coordinates
-missing = df_merged[df_merged["ra"].isna() | df_merged["dec"].isna()]
-if len(missing) > 0:
-    print(f"WARNING: {len(missing)} rows have no RA/Dec match:")
-    print(missing["Name"].tolist())
-
+df_merged = pd.merge(df_dat, df_csv_selected, on="Name", how="left")
 df_merged.to_csv("merged_output.csv", index=False)
 
 ########################################################
