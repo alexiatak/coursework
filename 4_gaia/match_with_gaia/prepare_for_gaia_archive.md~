@@ -1,0 +1,43 @@
+# prepare_for_gaia_archive.py
+
+Builds the upload CSV for the Gaia archive in the exact format Dima asked for.
+
+## Why
+
+Bailer-Jones photogeometric distances are not in the merged output. The cleanest way to fetch them is to upload a small user table to the Gaia archive and join it against `external.gaiaedr3_distance` by source ID. This script just reformats the matched table from the previous step into what the archive expects.
+
+## Inputs
+
+- `merged_with_gaiaid.csv` — output of `match_gaia_ids.py`
+
+## What it does
+
+1. Reads the matched table.
+2. Drops anything that did not get a Gaia ID.
+3. Selects Name, ra, dec, gaia_id and renames `gaia_id` to `gid`.
+4. Writes the result.
+
+## Output
+
+`for_gaia_archive.csv` — columns: Name, ra, dec, gid.
+
+## How to use it
+
+1. Go to https://gea.esac.esa.int/archive/.
+2. Upload `for_gaia_archive.csv` as a user table called `mark`.
+3. Run this ADQL:
+
+   ```sql
+   SELECT mark.Name, mark.ra, mark.dec, mark.gid,
+          edr3.r_med_photogeo, edr3.r_lo_photogeo, edr3.r_hi_photogeo
+   FROM   external.gaiaedr3_distance AS edr3
+   JOIN   user_<your_username>.mark   AS mark
+     ON   mark.gid = edr3.source_id
+   ```
+
+4. Download the result as `bj_distances.csv` and feed it into the next script.
+
+## Notes
+
+- Photogeometric distances are preferred over geometric-only because they use Gaia photometry as a luminosity prior. Dima only asked for the photogeometric columns.
+- `Name` is included in the SELECT clause so the result can be rejoined to the polarization data without going back through Gaia IDs.
