@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-
 Fig. 8-style TRIShUL (https://arxiv.org/pdf/2510.25911) diagnostic for the Markkanen cloud.
 
 This script is intentionally NOT the full TRIShUL pipeline. It makes the
 paper-style q/u vs distance-modulus plot and runs some checks:
 
-1. optional Bailer-Jones distance-quality cut
+1. optional Bailer-Jones distance-quality cut on the RoboPol sample
 2. manual cloud-distance tests, e.g. 350, 400, 430, 500 pc
 3. a simple automatic split test using q/u weighted means
 4. before/after weighted q,u means and jump significances
-5. a cumulative Mahalanobis diagnostic plot.
-
+5. a cumulative Mahalanobis diagnostic plot
+6. (NEW) optional overlay of Panopoulou+25 stars from the same polygon, in cyan,
+   to check whether there is a foreground component below ~200 pc
 Edit only the paths and parameters in the CONFIG section, then run:
 
     python markkanen_fig8_cloud_test.py
@@ -21,6 +21,14 @@ Expected merged-output columns:
 
 Expected distance-table columns:
     Name, gid, r_med_photogeo, r_lo_photogeo, r_hi_photogeo
+
+Expected Panopoulou catalog columns:
+    GID, starID, RA, DEC, l, b, p, e_p, evpa, e_evpa, FilterID,
+    origin, r_med_photogeo, r_lo_photogeo, r_hi_photogeo  (Panopoulou p is fractional, multiply by 100)
+
+NOTE: Planck-353 / RoboPol scatter analysis previously lived here; it has
+been split out into the standalone script planck_starlight_scatter.py.
+This script no longer reads any Planck data.
 """
 
 from __future__ import annotations
@@ -35,16 +43,13 @@ import matplotlib.pyplot as plt
 # CONFIG: change these manually
 # =============================================================================
 MERGED_CSV = r"../2_sky_plot/merged_output.csv"      # your RoboPol merged table
-BJ_CSV = r"bj_distances.csv"           # your Bailer-Jones distance table
+BJ_CSV = r"bj_distances.csv"                          # Bailer-Jones distances for RoboPol stars
 
-OUT_PREPARED = r"markkanen_fig8_prepared.csv"
-OUT_TESTS = r"markkanen_cloud_distance_tests.csv"
-OUT_FIG = r"markkanen_fig8_with_cloud_test.png"
-OUT_DIAG = r"markkanen_cumulative_mahalanobis.png"
-OUT_DIR = "markkanen_fig8_distance_tests"
-os.makedirs(OUT_DIR, exist_ok=True)
+# Panopoulou+25 catalog within the polygon (already has BJ distances merged)
+PANOPOULOU_CSV = r"../0_data/R/external_panopoulou_expanded_polygon.csv"
 
-
+# Toggle external overlay. Set False to reproduce the previous plot exactly.
+SHOW_PANOPOULOU = True
 
 
 # Recommended first-pass cut. Set to None if you want to keep everything.
@@ -53,7 +58,6 @@ RELATIVE_DIST_ERR_MAX = 0.25
 
 # Manual distances to test. Add/remove values here.
 MANUAL_CLOUD_DISTANCES_PC = [300, 350, 400, 430, 450, 500, 600]
-#MANUAL_CLOUD_DISTANCES_PC = [430]
 
 
 # Automatic grid-search range for a possible step in q/u.
@@ -64,6 +68,25 @@ MIN_STARS_PER_SIDE = 8
 
 FIG_DPI = 220
 
+# Outlier exclusion. Set to a list of star names to drop from the RoboPol sample
+# before any analysis (e.g. ["Mark_65"]).  This is a sensitivity test:
+# a few RoboPol stars with unusually tight error bars can single-handedly
+# dominate the chi^2 / cumulative-Mahalanobis cloud-distance estimates.
+# Compare the script outputs with and without exclusion to see whether the
+# detection is structural or driven by single stars.
+#EXCLUDE_STARS: list[str] = []
+EXCLUDE_STARS = ["Mark_65"]   # uncomment to test sensitivity
+
+# Suffix added to all output files when exclusion is active, so the two
+# variants can sit side-by-side in the same folder.
+_excl_tag = "_excl_" + "_".join(s.replace("Mark_", "M") for s in EXCLUDE_STARS) if EXCLUDE_STARS else ""
+
+OUT_PREPARED = f"markkanen_fig8_prepared{_excl_tag}.csv"
+OUT_TESTS = f"markkanen_cloud_distance_tests{_excl_tag}.csv"
+OUT_FIG = f"markkanen_fig8_with_cloud_test{_excl_tag}.png"
+OUT_DIAG = f"markkanen_cumulative_mahalanobis{_excl_tag}.png"
+OUT_DIR = f"markkanen_fig8_distance_tests{_excl_tag}"
+os.makedirs(OUT_DIR, exist_ok=True)
 
 
 def read_table_auto(path: str) -> pd.DataFrame:
@@ -79,6 +102,7 @@ def read_table_auto(path: str) -> pd.DataFrame:
 
 
 def load_and_prepare() -> pd.DataFrame:
+    """Load RoboPol q/u + Bailer-Jones distance, return joined and unit-converted table."""
     pol = read_table_auto(MERGED_CSV)
     bj = read_table_auto(BJ_CSV)
 
@@ -108,14 +132,14 @@ def load_and_prepare() -> pd.DataFrame:
         df[c] = pd.to_numeric(df[c], errors="coerce")
     df = df.dropna(subset=numeric_cols).copy()
 
-    #  q/u are fractional: Mark_0 q=-0.01185, u=0.01401 gives P=1.83%.
+    # q/u are fractional in RoboPol output: Mark_0 q=-0.01185, u=0.01401 gives P=1.83%.
     # Convert to percent for TRIShUL-style plotting.
     if max(df["q"].abs().max(), df["u"].abs().max()) < 0.1:
         for c in ["q", "sq", "u", "su"]:
             df[c] *= 100.0
-        print("Converted q, u, sq, su from fractional units to percent.")
+        print("Converted RoboPol q, u, sq, su from fractional units to percent.")
     else:
-        print("q/u look already in percent; no unit conversion applied.")
+        print("RoboPol q/u look already in percent; no unit conversion applied.")
 
     # Distance modulus and uncertainty.
     d = df["r_med_photogeo"].to_numpy(float)
@@ -132,10 +156,86 @@ def load_and_prepare() -> pd.DataFrame:
         print(f"Distance-quality cut sigma_d/d <= {RELATIVE_DIST_ERR_MAX:.0%}: "
               f"kept {len(df)}/{n0} stars")
 
+    if EXCLUDE_STARS:
+        n0 = len(df)
+        excluded = df[df["Name"].isin(EXCLUDE_STARS)][
+            ["Name", "r_med_photogeo", "q", "sq", "u", "su"]
+        ]
+        df = df[~df["Name"].isin(EXCLUDE_STARS)].copy()
+        print(f"Manual outlier exclusion: dropped {n0 - len(df)} star(s) named "
+              f"{EXCLUDE_STARS}")
+        if len(excluded) > 0:
+            print("  Excluded star details:")
+            print(excluded.to_string(index=False, float_format=lambda x: f"{x:8.4f}"))
+
     df = df.sort_values("r_med_photogeo").reset_index(drop=True)
     return df
 
 
+def load_panopoulou() -> pd.DataFrame | None:
+    """Load Panopoulou+25 catalog within polygon and return a frame ready for plotting.
+
+    Returns None if file missing or empty after filtering.
+    """
+    if not os.path.exists(PANOPOULOU_CSV):
+        print(f"Panopoulou catalog not found at {PANOPOULOU_CSV}; skipping overlay.")
+        return None
+
+    cat = read_table_auto(PANOPOULOU_CSV)
+    needed = ["RA", "DEC", "p", "e_p", "evpa", "e_evpa",
+              "r_med_photogeo", "r_lo_photogeo", "r_hi_photogeo", "FilterID"]
+    missing = [c for c in needed if c not in cat.columns]
+    if missing:
+        print(f"Panopoulou catalog missing columns {missing}; skipping overlay.")
+        return None
+
+    cat = cat.copy()
+    for c in ["p", "e_p", "evpa", "e_evpa", "r_med_photogeo",
+              "r_lo_photogeo", "r_hi_photogeo"]:
+        cat[c] = pd.to_numeric(cat[c], errors="coerce")
+    cat = cat.dropna(subset=["p", "evpa", "r_med_photogeo"]).copy()
+
+    # Panopoulou p is fractional. Convert to percent and propagate.
+    cat["p_pct"] = cat["p"] * 100.0
+    cat["ep_pct"] = cat["e_p"] * 100.0
+
+    # Build q/u from p, evpa.  Convention: q = p cos(2*PA), u = p sin(2*PA), PA in deg.
+    pa_rad = np.radians(cat["evpa"].to_numpy(float))
+    cat["q"] = cat["p_pct"] * np.cos(2.0 * pa_rad)
+    cat["u"] = cat["p_pct"] * np.sin(2.0 * pa_rad)
+
+    # Linear-error propagation:
+    # sigma_q ≈ sqrt( (cos2θ * σp)^2 + (2 p sin2θ * σθ)^2 )
+    # where σθ is in radians.
+    pa_err_rad = np.radians(cat["e_evpa"].to_numpy(float))
+    cos2t = np.cos(2.0 * pa_rad)
+    sin2t = np.sin(2.0 * pa_rad)
+    cat["sq"] = np.sqrt((cos2t * cat["ep_pct"])**2
+                        + (2.0 * cat["p_pct"] * sin2t * pa_err_rad)**2)
+    cat["su"] = np.sqrt((sin2t * cat["ep_pct"])**2
+                        + (2.0 * cat["p_pct"] * cos2t * pa_err_rad)**2)
+
+    # Distance modulus
+    d = cat["r_med_photogeo"].to_numpy(float)
+    d_lo = cat["r_lo_photogeo"].to_numpy(float)
+    d_hi = cat["r_hi_photogeo"].to_numpy(float)
+    cat["mu"] = 5.0 * np.log10(d) - 5.0
+    cat["sigma_d"] = 0.5 * (d_hi - d_lo)
+    cat["s_mu"] = (5.0 / np.log(10.0)) * (cat["sigma_d"] / d)
+
+    print(f"\nPanopoulou+25 in polygon: {len(cat)} stars with p, evpa, distance.")
+    print(f"  distance range: {d.min():.0f} - {d.max():.0f} pc, median {np.median(d):.0f}")
+    n_below_200 = int((d < 200).sum())
+    print(f"  stars closer than 200 pc: {n_below_200}  (possibly before cloud)")
+    print(f"  FilterID distribution:")
+    for v, c in cat["FilterID"].value_counts(dropna=False).items():
+        print(f"    FilterID={v}: {c}")
+    return cat
+
+
+# =============================================================================
+# Cloud test statistics
+# =============================================================================
 def weighted_mean_and_error(values: np.ndarray, errors: np.ndarray) -> tuple[float, float]:
     values = np.asarray(values, dtype=float)
     errors = np.asarray(errors, dtype=float)
@@ -187,7 +287,6 @@ def split_statistics(df: pd.DataFrame, cloud_pc: float) -> dict:
     jump_amp = np.sqrt(dq**2 + du**2)
     jump_sig_diag = np.sqrt(sig_q**2 + sig_u**2)
 
-    # Weighted piecewise chi2 in q and u. Smaller = cleaner two-level step.
     chi2 = 0.0
     chi2 += np.sum(((df.loc[before, "q"] - qb) / df.loc[before, "sq"]) ** 2)
     chi2 += np.sum(((df.loc[before, "u"] - ub) / df.loc[before, "su"]) ** 2)
@@ -235,6 +334,13 @@ def cumulative_mahalanobis(df: pd.DataFrame) -> pd.DataFrame:
     u = out["u"].to_numpy(float)
     sq = out["sq"].to_numpy(float)
     su = out["su"].to_numpy(float)
+    # Avoid div-by-zero / nan: drop rows with non-positive or non-finite errors.
+    ok = np.isfinite(q) & np.isfinite(u) & np.isfinite(sq) & np.isfinite(su) & (sq > 0) & (su > 0)
+    if (~ok).any():
+        n_drop = int((~ok).sum())
+        print(f"  cumulative_mahalanobis: dropped {n_drop} rows with bad errors.")
+    out = out.loc[ok].reset_index(drop=True)
+    q = q[ok]; u = u[ok]; sq = sq[ok]; su = su[ok]
     out["dMaha"] = np.sqrt((q / sq) ** 2 + (u / su) ** 2)
     out["cum_dMaha"] = np.cumsum(out["dMaha"])
     return out
@@ -260,25 +366,45 @@ def simple_piecewise_linear_break(y: np.ndarray, min_size: int = 8) -> int | Non
             best_i = i
     return best_i
 
+# Plotting
 
-def plot_main(df: pd.DataFrame, tests: pd.DataFrame, cloud_pc, outfile=None):
-#def plot_main(df: pd.DataFrame, tests: pd.DataFrame, cloud_pc: float | None) -> None:
-    fig, ax = plt.subplots(figsize=(10, 6))
+def plot_main(df: pd.DataFrame,
+              tests: pd.DataFrame,
+              cloud_pc,
+              outfile=None,
+              df_pano: pd.DataFrame | None = None) -> None:
+    """Fig. 8 plot. Optional Panopoulou overlay."""
+    fig, ax = plt.subplots(figsize=(11, 6))
 
+    # --- RoboPol q, u (main data) ---------------------------------------------
     ax.errorbar(df["mu"], df["q"], xerr=df["s_mu"], yerr=df["sq"],
                 fmt="+", ms=5, color="tab:green", ecolor="tab:green",
-                alpha=0.65, lw=0.8, capsize=0, label="q")
+                alpha=0.75, lw=0.8, capsize=0, label="RoboPol q")
     ax.errorbar(df["mu"], df["u"], xerr=df["s_mu"], yerr=df["su"],
                 fmt="+", ms=5, color="tab:blue", ecolor="tab:blue",
-                alpha=0.65, lw=0.8, capsize=0, label="u")
+                alpha=0.75, lw=0.8, capsize=0, label="RoboPol u")
     ax.axhline(0, color="k", lw=0.6, alpha=0.7)
 
-    # Thin grey manual candidates.
+    # --- Panopoulou+25 overlay ------------------------------------------------
+    if df_pano is not None and len(df_pano) > 0:
+        ax.errorbar(df_pano["mu"], df_pano["q"],
+                    xerr=df_pano["s_mu"], yerr=df_pano["sq"],
+                    fmt="x", ms=5, color="tab:orange", ecolor="tab:orange",
+                    alpha=0.55, lw=0.8, capsize=0,
+                    label=f"Panopoulou+25 q (N={len(df_pano)})")
+        ax.errorbar(df_pano["mu"], df_pano["u"],
+                    xerr=df_pano["s_mu"], yerr=df_pano["su"],
+                    fmt="x", ms=5, color="tab:purple", ecolor="tab:purple",
+                    alpha=0.55, lw=0.8, capsize=0,
+                    label=f"Panopoulou+25 u (N={len(df_pano)})")
+
+    # --- Manual cloud-distance candidates -------------------------------------
     for d in MANUAL_CLOUD_DISTANCES_PC:
         if df["r_med_photogeo"].min() < d < df["r_med_photogeo"].max():
             ax.axvline(5 * np.log10(d) - 5, color="0.5", lw=0.7,
                        alpha=0.25, ls="--")
 
+    # --- Tested cloud distance + before/after weighted means -----------------
     if cloud_pc is not None:
         st = split_statistics(df, cloud_pc)
         mu_c = st["cloud_mu"]
@@ -301,8 +427,11 @@ def plot_main(df: pd.DataFrame, tests: pd.DataFrame, cloud_pc, outfile=None):
 
     ax.set_xlabel(r"Distance modulus  $\mu$")
     ax.set_ylabel("Stokes parameters  [%]")
-    ax.set_title(f"Markkanen cloud, RoboPol: q/u vs distance (N={len(df)})")
-    ax.legend(loc="upper right")
+    title = f"Markkanen cloud, RoboPol: q/u vs distance (N={len(df)})"
+    if df_pano is not None:
+        title += f"  +  Panopoulou+25 (N={len(df_pano)})"
+    ax.set_title(title)
+    ax.legend(loc="upper right", fontsize=7, ncol=2)
     ax.grid(alpha=0.25)
 
     sec = ax.secondary_xaxis(
@@ -313,41 +442,81 @@ def plot_main(df: pd.DataFrame, tests: pd.DataFrame, cloud_pc, outfile=None):
     sec.set_xlabel("Distance  [kpc]")
 
     plt.tight_layout()
-    #plt.savefig(OUT_FIG, dpi=FIG_DPI, bbox_inches="tight")
-    
     if outfile is not None:
         plt.savefig(outfile, dpi=200, bbox_inches="tight")
     else:
         plt.savefig(OUT_FIG, dpi=200, bbox_inches="tight")
-        
     plt.close(fig)
 
 
-def plot_diagnostic(df: pd.DataFrame) -> float | None:
+def plot_diagnostic(df: pd.DataFrame,
+                    df_pano: pd.DataFrame | None = None) -> tuple[float | None, float | None]:
+    """Cumulative Mahalanobis-distance plot with optional Panopoulou overlay.
+
+    Each catalog is sorted by distance independently. The x-axis is the
+    distance-sorted stellar index within each catalog. A kink in either curve
+    indicates that the second half of stars is systematically more polarized
+    than the first half, i.e. there is a cloud screen between them.
+
+    Returns (robopol_break_pc, panopoulou_break_pc); either can be None.
+    """
+    fig, ax = plt.subplots(figsize=(9, 5))
+
+    # --- RoboPol curve --------------------------------------------------------
     dfd = cumulative_mahalanobis(df)
     b = simple_piecewise_linear_break(dfd["cum_dMaha"].to_numpy(),
                                       min_size=MIN_STARS_PER_SIDE)
-    fig, ax = plt.subplots(figsize=(9, 5))
-    ax.plot(np.arange(len(dfd)), dfd["cum_dMaha"], marker="o", ms=3, lw=1)
+    ax.plot(np.arange(len(dfd)), dfd["cum_dMaha"],
+            marker="o", ms=3, lw=1, color="tab:blue",
+            label=f"RoboPol  (N={len(dfd)})")
     if b is not None:
         d_b = float(dfd.loc[b, "r_med_photogeo"])
-        ax.axvline(b, color="purple", lw=1.3)
-        ax.text(b, ax.get_ylim()[1], f" {d_b:.0f} pc", color="purple",
-                va="top", ha="left")
-    ax.set_xlabel("Distance-sorted stellar index")
+        ax.axvline(b, color="tab:blue", lw=1.3, ls="--", alpha=0.7)
+        ax.text(b, dfd["cum_dMaha"].iloc[-1] * 0.98,
+                f" RoboPol break: {d_b:.0f} pc",
+                color="tab:blue", va="top", ha="left", fontsize=9)
+
+    # --- Panopoulou curve (optional) ------------------------------------------
+    b_pano_pc = None
+    if df_pano is not None and len(df_pano) > 0:
+        dfd_p = cumulative_mahalanobis(df_pano)
+        b_p = simple_piecewise_linear_break(dfd_p["cum_dMaha"].to_numpy(),
+                                            min_size=MIN_STARS_PER_SIDE)
+        ax.plot(np.arange(len(dfd_p)), dfd_p["cum_dMaha"],
+                marker="x", ms=3, lw=1, color="tab:cyan", alpha=0.85,
+                label=f"Panopoulou+25  (N={len(dfd_p)})")
+        if b_p is not None:
+            b_pano_pc = float(dfd_p.loc[b_p, "r_med_photogeo"])
+            ax.axvline(b_p, color="tab:cyan", lw=1.3, ls=":", alpha=0.7)
+            ax.text(b_p, dfd_p["cum_dMaha"].iloc[-1] * 0.55,
+                    f" Panopoulou break: {b_pano_pc:.0f} pc",
+                    color="tab:cyan", va="top", ha="left", fontsize=9)
+
+    ax.set_xlabel("Distance-sorted stellar index (within each catalog)")
     ax.set_ylabel("Cumulative Mahalanobis distance")
-    ax.set_title("Diagnostic only: not full TRIShUL breakpoint inference")
+    title = "Diagnostic only: not full TRIShUL breakpoint inference"
+    if df_pano is not None and len(df_pano) > 0:
+        title += "  (RoboPol + Panopoulou+25)"
+    ax.set_title(title)
+    ax.legend(loc="upper left")
     ax.grid(alpha=0.25)
     plt.tight_layout()
     plt.savefig(OUT_DIAG, dpi=FIG_DPI, bbox_inches="tight")
     plt.close(fig)
-    return None if b is None else float(dfd.loc[b, "r_med_photogeo"])
+    rp = None if b is None else float(dfd.loc[b, "r_med_photogeo"])
+    return rp, b_pano_pc
 
 
-def print_summary(df: pd.DataFrame, tests: pd.DataFrame, best_pc: float | None,
-                  maha_pc: float | None) -> None:
-    print("\nFinal sample")
-    print("------------")
+# Reporting
+
+def print_summary(df: pd.DataFrame,
+                  tests: pd.DataFrame,
+                  best_pc: float | None,
+                  maha_pc: float | None,
+                  df_pano: pd.DataFrame | None = None,
+                  maha_pano_pc: float | None = None) -> None:
+    print("\nFinal RoboPol sample")
+    print("--------------------")
     print(f"N = {len(df)}")
     print(f"distance range = {df['r_med_photogeo'].min():.0f} - "
           f"{df['r_med_photogeo'].max():.0f} pc")
@@ -372,15 +541,23 @@ def print_summary(df: pd.DataFrame, tests: pd.DataFrame, best_pc: float | None,
         print(f"delta u = {best['delta_u']:.3f} ± {best['e_delta_u']:.3f} % "
               f"({best['sig_u']:.1f} sigma)")
         print(f"combined diagonal jump significance ≈ {best['jump_sig_diag']:.1f} sigma")
-    else:
-        print("\nAutomatic q/u step test: no valid split found.")
 
     if maha_pc is not None:
         print("\nCumulative Mahalanobis diagnostic")
         print("---------------------------------")
-        print(f"simple piecewise-linear bend near {maha_pc:.0f} pc")
-        print("This is only a quick diagnostic, not the full TRIShUL significance test.")
+        print(f"RoboPol piecewise-linear bend near {maha_pc:.0f} pc")
+        if maha_pano_pc is not None:
+            print(f"Panopoulou+25 piecewise-linear bend near {maha_pano_pc:.0f} pc")
+        print("(diagnostic only, not full TRIShUL significance test)")
 
+    if df_pano is not None and len(df_pano) > 0:
+        d_arr = df_pano["r_med_photogeo"].to_numpy()
+        print("\nPanopoulou+25 overlay summary")
+        print("-----------------------------")
+        print(f"N = {len(df_pano)}")
+        print(f"distance range = {d_arr.min():.0f} - {d_arr.max():.0f} pc, "
+              f"median {np.median(d_arr):.0f} pc")
+        print(f"stars closer than 200 pc: {int((d_arr<200).sum())}")
 
 
 def main() -> None:
@@ -390,25 +567,27 @@ def main() -> None:
 
     tests = run_cloud_tests(df)
     best_pc = choose_best_cloud(tests)
-    maha_pc = plot_diagnostic(df)
 
     df.to_csv(OUT_PREPARED, index=False)
     tests.to_csv(OUT_TESTS, index=False)
-    #plot_main(df, tests, best_pc)
-    #plot_main(df, tests, 430.0)
-    
+
+    df_pano = load_panopoulou() if SHOW_PANOPOULOU else None
+
+    # diagnostic plot needs df_pano if SHOW_PANOPOULOU is on
+    maha_pc, maha_pano_pc = plot_diagnostic(df, df_pano=df_pano)
+
     os.makedirs(OUT_DIR, exist_ok=True)
-    
     for d_pc in MANUAL_CLOUD_DISTANCES_PC:
         out_fig = os.path.join(OUT_DIR, f"markkanen_fig8_{int(d_pc)}pc.png")
-        plot_main(df,tests, d_pc, outfile=out_fig)
-    
+        plot_main(df, tests, d_pc,
+                  outfile=out_fig,
+                  df_pano=df_pano)
 
-    print_summary(df, tests, best_pc, maha_pc)
+    print_summary(df, tests, best_pc, maha_pc, df_pano, maha_pano_pc)
     print(f"\nSaved prepared table: {OUT_PREPARED}")
     print(f"Saved cloud tests:    {OUT_TESTS}")
-    print(f"Saved main figure:    {OUT_FIG}")
     print(f"Saved diagnostic:     {OUT_DIAG}")
+    print(f"Per-distance figures: {OUT_DIR}/")
 
 
 if __name__ == "__main__":
