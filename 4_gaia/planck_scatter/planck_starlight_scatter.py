@@ -24,6 +24,21 @@ Conventions:
       ABSORPTION polarization, so we expect a NEGATIVE slope on both panels.
       |R| is reported as the absolute value of the slope.
 
+  
+Methodological note :
+    Mehandiratta 2026 (https://www.aanda.org/articles/aa/pdf/2026/04/aa57681-25.pdf) fit Q-q and U-u using LinMix (Kelly 2007)
+    for the per-panel slopes and a custom emcee MCMC for the joint R_P/p slope,
+    with the FULL Planck noise covariance (C_QQ, C_UU, off-diagonal C_QU) and
+    the post-Galactic-rotation off-diagonal optical covariance sigma_qu.
+ 
+    This script does NOT do that.  It does a per-panel York (1969) fit because:
+      a. we have RoboPol per-star sigma_q, sigma_u but NOT the Planck per-pixel
+          noise covariance maps on disk - only the smoothed I, Q, U intensity
+          maps - so a method that needs C_QQ, C_UU, C_QU is not runnable here;
+      b. we drop the off-diagonal sigma_qu introduced by the equatorial->
+          Galactic rotation in optical_to_galactic_qu();
+      c. we do NOT do a joint fit across both panels.
+ 
 Run:
     python planck_starlight_scatter.py
 """
@@ -158,9 +173,22 @@ def sample_planck(df_stars):
 # Linear fit (York 1969) and pixel averaging
 
 def york_fit(x, y, sx, sy, n_iter=50):
+  
     """Weighted linear fit y = a + b*x with errors on both axes.
     Returns (a, b, sa, sb_formal, chi2_red).  No correlation between sx, sy.
+ 
+    Why York here (and not the LinMix/emcee approach used in
+    Mehandiratta+2026): we do not have the Planck per-pixel noise
+    covariance maps loaded, only the smoothed intensity maps, so a method
+    that needs C_QQ, C_UU, C_QU is not runnable.  York with real sigma_x
+    (RoboPol) and a small dummy sigma_y is the right cheap proxy: it
+    reduces to weighted-x fitting in this regime, correctly down-weights
+    points with large optical errors (Mark_65 concern), and gives an
+    unbiased slope.  The reported slope error is rescaled to
+    max(sb_formal, sb_resid) by the caller in plot_scatter() to be honest
+    about residual scatter. 
     """
+    
     x = np.asarray(x, dtype=float); y = np.asarray(y, dtype=float)
     sx = np.asarray(sx, dtype=float); sy = np.asarray(sy, dtype=float)
     ok = (np.isfinite(x) & np.isfinite(y) & np.isfinite(sx) & np.isfinite(sy)
