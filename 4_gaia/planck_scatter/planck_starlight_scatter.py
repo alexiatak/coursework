@@ -51,7 +51,7 @@ PLANCK_Q_FITS = os.path.join(PLANCK_DIR, "planck_353_Q_smoothed20arcmin_nside102
 PLANCK_U_FITS = os.path.join(PLANCK_DIR, "planck_353_U_smoothed20arcmin_nside1024_nested.fits")
 
 OUT_DIR = os.path.expanduser(
-    "~/Desktop/coursework/4_gaia/planck_scatter/output"
+    "~/Desktop/coursework/4_gaia/planck_scatter/planck_output"
 )
 
 FIG_DPI = 220
@@ -253,11 +253,7 @@ def plot_scatter(paired, pix_avg, outfile):
 
     fit_summary = {}
     for ax, qcol, scol, qlabel, planckcol, planckname in panels:
-        # per-star (faint)
-        ax.errorbar(paired[qcol], paired[planckcol],
-                    xerr=paired[scol], fmt="o", ms=3,
-                    color="forestgreen", alpha=0.25,
-                    label=f"per star (N={len(paired)})", zorder=1)
+        
         # per-pixel (strong)
         ax.errorbar(pix_avg[qcol], pix_avg[planckcol],
                     xerr=pix_avg[scol], fmt="o", ms=6,
