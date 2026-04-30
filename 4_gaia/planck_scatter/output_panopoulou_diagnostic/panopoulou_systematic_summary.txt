@@ -1,0 +1,21 @@
+======================================================================
+Panopoulou+25 systematic diagnostic (Markkanen field)
+======================================================================
+
+[1] Panopoulou: weighted means by FilterID
+  FilterID      N        <q>      sigma        <u>      sigma
+         0    104    -0.0575     0.0021    +0.0770     0.0020
+        20      2    +0.0002     0.0005    +0.0001     0.0002
+
+[1b] Panopoulou: weighted means by origin
+          origin      N        <q>      sigma        <u>      sigma
+external_panopoulou_2025    106    -0.0033     0.0005    +0.0007     0.0002
+
+[2] Whole-sample comparison
+  Panopoulou+25 (N=106):  <q>=-0.0033±0.0005  <u>=+0.0007±0.0002
+  RoboPol       (N=154):  <q>=-0.0718±0.0040  <u>=+0.2684±0.0038
+
+[3] Pano - RoboPol offset
+  delta q = +0.0685 ± 0.0040  (17.2σ)
+  delta u = -0.2677 ± 0.0038  (70.1σ)
+======================================================================
