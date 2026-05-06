@@ -70,8 +70,25 @@ OUT_DIR = os.path.expanduser(
 )
 
 FIG_DPI = 220
+# Optional rebinning of stars into coarser HEALPix pixels for averaging.
+# The smoothed Planck map stays at native Nside (1024); we only change the
+# pixelization used to group stars when computing per-pixel weighted means.
+# Set to None to use the map's native Nside (current behavior, 1024).
+# Try 512, 256, 128 .
+BIN_NSIDE = None
+#BIN_NSIDE = 512
 
+# Warn loudly if the Planck FITS files are not in Galactic coordinates.
+# The Appenzeller rotation in optical_to_galactic_qu() assumes Planck is
+# in Galactic frame (COORDSYS = 'G').
+CHECK_COORDSYS = True
 
+# Output filename suffix when BIN_NSIDE differs from the map's native Nside.
+# Lets us produce side-by-side variants without overwriting earlier outputs.
+def _bin_tag(map_nside, bin_nside):
+    if bin_nside is None or bin_nside == map_nside:
+        return ""
+    return f"_bin{bin_nside}"
 
 # Coordinate / Stokes utilities
 
@@ -141,13 +158,30 @@ def sample_planck(df_stars):
             sys.exit(f"ERROR: {f} looks like a git-lfs pointer file (<1 kB).")
 
     print(f"  reading I from {os.path.basename(PLANCK_I_FITS)}")
-    I_map = hp.read_map(PLANCK_I_FITS, nest=True)
+    I_map, I_hdr = hp.read_map(PLANCK_I_FITS, nest=True, h=True)
     print(f"  reading Q from {os.path.basename(PLANCK_Q_FITS)}")
     Q_map = hp.read_map(PLANCK_Q_FITS, nest=True)
     print(f"  reading U from {os.path.basename(PLANCK_U_FITS)} (flipping COSMO -> IAU)")
     U_map = -hp.read_map(PLANCK_U_FITS, nest=True)
     nside = hp.get_nside(I_map)
     print(f"  Nside = {nside}")
+
+    if CHECK_COORDSYS:
+        coordsys = None
+        for k, v in I_hdr:
+            if str(k).strip().upper() == "COORDSYS":
+                coordsys = str(v).strip().strip("'").strip()
+                break
+        if coordsys is None:
+            print("  WARNING: COORDSYS keyword not found in Planck I FITS header.")
+            print("           This script assumes Planck maps are in Galactic frame.")
+        elif coordsys.upper() not in ("G", "GAL", "GALACTIC"):
+            print(f"  WARNING: Planck COORDSYS = {coordsys!r}, not 'G'.")
+            print("           Optical q,u are rotated to Galactic, so a non-G map")
+            print("           will give wrong scatter slopes. Aborting.")
+            sys.exit(1)
+        else:
+            print(f"  COORDSYS = {coordsys!r}  (Galactic frame, OK)")
 
     sc = SkyCoord(df_stars["ra"].to_numpy(float),
                   df_stars["dec"].to_numpy(float),
@@ -156,7 +190,7 @@ def sample_planck(df_stars):
     phi = np.radians(sc.l.deg)
     pix = hp.ang2pix(nside, theta, phi, nest=True)
 
-    return pd.DataFrame({
+    out = pd.DataFrame({
         "Name": df_stars["Name"].values,
         "ra": df_stars["ra"].values,
         "dec": df_stars["dec"].values,
@@ -167,6 +201,7 @@ def sample_planck(df_stars):
         "Q_planck_KCMB": Q_map[pix],
         "U_planck_KCMB": U_map[pix],
     })
+    return out, int(nside)
 
 
 
@@ -346,7 +381,7 @@ def main():
     df = load_robopol(ROBOPOL_CSV)
 
     print("\n[2/4] Sampling Planck at star positions")
-    df_planck = sample_planck(df)
+    df_planck, map_nside =sample_planck(df)
 
     print("\n[3/4] Rotating optical q,u into Galactic frame and pairing")
     q_gal, u_gal, sq_gal, su_gal = optical_to_galactic_qu(
@@ -370,24 +405,57 @@ def main():
         "Q_planck_KCMB": df_planck["Q_planck_KCMB"].values,
         "U_planck_KCMB": df_planck["U_planck_KCMB"].values,
     })
-    pix_avg = average_per_pixel(paired,
+
+    # Optional coarser binning.
+    if BIN_NSIDE is not None and BIN_NSIDE != map_nside:
+        if BIN_NSIDE > map_nside:
+            print(f"  WARNING: BIN_NSIDE={BIN_NSIDE} > map Nside={map_nside}, "
+                  f"keeping map Nside.")
+            bin_pix = paired["pix"].values
+            effective_bin_nside = map_nside
+        else:
+            print(f"  Rebinning stars into Nside={BIN_NSIDE} pixels "
+                  f"(map stays at Nside={map_nside})")
+            theta = np.radians(90.0 - paired["b"].to_numpy(float))
+            phi = np.radians(paired["l"].to_numpy(float))
+            bin_pix = hp.ang2pix(BIN_NSIDE, theta, phi, nest=True)
+            effective_bin_nside = BIN_NSIDE
+    else:
+        bin_pix = paired["pix"].values
+        effective_bin_nside = map_nside
+
+    paired["pix_bin"] = bin_pix
+    # average_per_pixel groups on column "pix", so pass a renamed copy
+    paired_for_bin = paired.rename(columns={"pix": "pix_native",
+                                            "pix_bin": "pix"})
+    pix_avg = average_per_pixel(paired_for_bin,
                                 value_cols=["q_gal", "u_gal"],
                                 err_cols=["sq_gal", "su_gal"])
+    # 1/sigma^2 weighting 
+    # see w = 1.0 / errs[mask]**2).
+    print(f"  {len(paired)} stars -> {len(pix_avg)} unique bins at Nside="
+          f"{effective_bin_nside} "
+          f"({(paired_for_bin['pix'].value_counts() > 1).sum()} bins with >1 star)")
+    
     print(f"  {len(paired)} stars -> {len(pix_avg)} unique pixels "
           f"({(paired['pix'].value_counts() > 1).sum()} pixels with >1 star)")
 
     print("\n[4/4] Plotting and writing outputs")
-    out_png = os.path.join(OUT_DIR, "markkanen_planck_starlight_scatter.png")
+    tag = _bin_tag(map_nside, effective_bin_nside)
+    out_png = os.path.join(OUT_DIR,
+                           f"markkanen_planck_starlight_scatter{tag}.png")
     fits = plot_scatter(paired, pix_avg, out_png)
-    paired.to_csv(os.path.join(OUT_DIR, "planck_starlight_paired_robopol.csv"),
+    paired.to_csv(os.path.join(OUT_DIR,
+                               f"planck_starlight_paired_robopol{tag}.csv"),
                   index=False)
-    pix_avg.to_csv(os.path.join(OUT_DIR, "planck_starlight_pixavg_robopol.csv"),
+    pix_avg.to_csv(os.path.join(OUT_DIR,
+                                f"planck_starlight_pixavg_robopol{tag}.csv"),
                    index=False)
 
     print(f"\n  wrote {out_png}")
-    print(f"  wrote planck_starlight_paired_robopol.csv "
+    print(f"  wrote planck_starlight_paired_robopol{tag}.csv "
           f"({len(paired)} rows)")
-    print(f"  wrote planck_starlight_pixavg_robopol.csv "
+    print(f"  wrote planck_starlight_pixavg_robopol{tag}.csv "
           f"({len(pix_avg)} rows)")
 
     print("\n" + "=" * 70)
@@ -395,10 +463,13 @@ def main():
     print("=" * 70)
     for label, key, sign in [("Q vs q", "q_gal", "Q"), ("U vs u", "u_gal", "U")]:
         f = fits[key]
-        print(f"  {label}:  slope = {f['b']:+.3e} \u00b1 {f['sb']:.1e}   "
-              f"|R| = {abs(f['b']):.3e}   "
-              f"sigma = {abs(f['b']) / f['sb']:.1f} "
-              f"(reduced chi2 = {f['chi2_red']:.2f})")
+        sb_honest = f['sb'] * np.sqrt(max(f['chi2_red'], 1.0))
+        print(f" {label}:")
+        print(f" slope = {f['b']:+.3e} \u00b1 {f['sb']:.1e} " f"(formal: {abs(f['b']) / f['sb']:.1f} sigma)")
+        print(f" slope = {f['b']:+.3e} \u00b1 {sb_honest:.1e} " f"(chi2-rescaled: {abs(f['b']) / sb_honest:.1f} sigma)")
+        print(f" intercept = {f['a']:+.3e} \u00b1 {f['sa']:.1e} " f"({abs(f['a']) / f['sa']:.1f} sigma from zero)")
+        print(f" chi2_red = {f['chi2_red']:.2f}")
+
 
     print("\nDone.")
 
