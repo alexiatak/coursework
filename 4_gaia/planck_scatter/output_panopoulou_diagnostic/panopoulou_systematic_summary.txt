@@ -18,4 +18,29 @@ external_panopoulou_2025    106    -0.0033     0.0005    +0.0007     0.0002
 [3] Pano - RoboPol offset
   delta q = +0.0685 ± 0.0040  (17.2σ)
   delta u = -0.2677 ± 0.0038  (70.1σ)
+
+[4] Localized distance-window comparisons (Pano vs RoboPol)
+
+  Window: 150-400 pc (primary overlap)  (Pano N=53, RoboPol N=55)
+    q:  <q>_pano=-0.0519±0.0028  <q>_robo=-0.0503±0.0066
+        delta = -0.0016 ± 0.0072  (weighted-mean z = -0.22, p = 8.28e-01)
+        Student t = -0.93  (dof=106, p = 3.55e-01)
+        Welch   t = -0.94  (dof=71.0, p = 3.49e-01)
+    u:  <u>_pano=+0.0873±0.0027  <u>_robo=+0.2349±0.0064
+        delta = -0.1476 ± 0.0070  (weighted-mean z = -21.19, p = 1.15e-99)
+        Student t = -6.45  (dof=105, p = 3.42e-09)
+        Welch   t = -6.57  (dof=76.9, p = 5.29e-09)
+
+  Window: 0-200 pc (foreground)  (Pano N=53, RoboPol N=0)
+    Skipped: too few stars in this window.
+
+  Window: 200-500 pc (cloud regime)  (Pano N=44, RoboPol N=76)
+    q:  <q>_pano=-0.0494±0.0031  <q>_robo=-0.0694±0.0054
+        delta = +0.0200 ± 0.0062  (weighted-mean z = +3.21, p = 1.34e-03)
+        Student t = -0.31  (dof=118, p = 7.55e-01)
+        Welch   t = -0.39  (dof=102.7, p = 7.00e-01)
+    u:  <u>_pano=+0.0934±0.0031  <u>_robo=+0.2347±0.0055
+        delta = -0.1413 ± 0.0063  (weighted-mean z = -22.47, p = 8.35e-112)
+        Student t = -4.61  (dof=117, p = 1.06e-05)
+        Welch   t = -5.70  (dof=105.6, p = 1.11e-07)
 ======================================================================

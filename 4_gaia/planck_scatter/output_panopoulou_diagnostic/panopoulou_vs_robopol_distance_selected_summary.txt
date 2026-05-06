@@ -1,0 +1,24 @@
+============================================================================
+RoboPol vs Panopoulou+25 distance-selected q/u comparison
+============================================================================
+Distance selection: 200 <= d <= 900 pc
+Comparison frame: galactic
+T-test mode: Welch unequal-variance
+
+Selected RoboPol stars:       123 / 154
+Selected Panopoulou+25 stars: 52 / 106
+RoboPol distance range selected: 202.7 - 898.5 pc
+Pano distance range selected:    204.0 - 706.6 pc
+
+[q]
+  RoboPol       N=123: sample mean= +0.0434, std=  0.3687; weighted= +0.0286 ± 0.0045
+  Panopoulou+25 N= 52: sample mean= +0.0173, std=  0.1212; weighted= +0.0390 ± 0.0030
+  Pano - RoboPol weighted offset = +0.0104 ± 0.0054  (+1.94 sigma)
+  Welch two-sample t-test: t=+0.701, p=0.484
+
+[u]
+  RoboPol       N=123: sample mean= +0.0404, std=  0.2259; weighted= +0.0847 ± 0.0048
+  Panopoulou+25 N= 52: sample mean= +0.0496, std=  0.1198; weighted= +0.0639 ± 0.0030
+  Pano - RoboPol weighted offset = -0.0208 ± 0.0056  (-3.69 sigma)
+  Welch two-sample t-test: t=-0.350, p=0.7265
+============================================================================
