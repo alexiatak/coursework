@@ -8,8 +8,9 @@ from astropy import units as u
 
 FITS_FILE   = "./diff_ebv_gnilc_lenz.fits"
 MY_STARS    = "./merged_output.csv"
-EXT_CATALOG = "../0_data/R/external_panopoulou_expanded_polygon.csv"
-OUTPUT_FILE = "./polarization_map_equatorial.png"
+#EXT_CATALOG = "../0_data/R/external_panopoulou_expanded_polygon.csv"
+EXT_CATALOG = "../0_data/R/external_panopoulou_combined_polygon.csv"
+OUTPUT_FILE = "./polarization_map_equatorial_smaller_polygon.png"
 
 SCALE_MY  = 0.5
 SCALE_EXT = 0.5

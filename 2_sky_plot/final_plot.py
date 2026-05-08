@@ -28,7 +28,8 @@ SHOW_EXTERNAL_CATALOG = True        #   set to True to overlay the external Pano
 
 
 # Path to the external catalog CSV produced by agglomeration_polygon_selector.py
-EXTERNAL_CATALOG_PATH = "../0_data/R/external_panopoulou_expanded_polygon.csv"
+#EXTERNAL_CATALOG_PATH = "../0_data/R/external_panopoulou_expanded_polygon.csv"
+EXTERNAL_CATALOG_PATH = "../0_data/R/external_panopoulou_combined_polygon.csv"
 
 # Unified segment scale — same half-length per P% for every dataset
 SCALE_UNIFIED = 0.5
@@ -416,7 +417,7 @@ def segments_on_map(fitsfile, ra, dec, Ps, pas,
 
 
     plt.legend(loc='upper right')
-    plt.savefig('polarization_map.png', dpi=300, bbox_inches='tight')
+    plt.savefig('polarization_map_smaller_polygon.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 
