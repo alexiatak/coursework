@@ -33,10 +33,10 @@ BAND_FILES = {
 # G (green) — check if it is Cousins V, use 0.530; 
 #             
 LAMBDA_EFF = {
-    "B": 0.440,
-    "G": 0.530,   # confirm this 
-    "R": 0.640,
-    "I": 0.800,
+    "B": 0.436,     #B - Johnson
+    "G": 0.477,     #g - sdss-g' / Sloan  g
+    "R": 0.640,     #R - Cousins
+    "I": 0.763,     #i - sdss-i' / Sloan i
 }
 
 # Which stars to fit. These must appear by name in the .dat files.
@@ -147,7 +147,7 @@ def main():
         print(f"Created/touched {fname}")
 
     print(f"\nDone. Now compile and run the Fortran program:")
-    print(f"  gfortran code.for -o serk")
+    print(f"  gfortran -ffixed-form -ffixed-line-length-132 code_fixed.for -o serk")
     print(f"  ./serk")
     print(f"\nResults will be in out1.txt (summary) and out2.txt (per-point fit).")
 

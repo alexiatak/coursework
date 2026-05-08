@@ -26,10 +26,10 @@ BAND_FILES = {
 
 
 LAMBDA_EFF = {
-    "B": 0.440,
-    "G": 0.530,
-    "R": 0.640,
-    "I": 0.800,
+    "B": 0.436,     #B - Johnson
+    "G": 0.477,     #g - sdss-g' / Sloan  g
+    "R": 0.640,     #R - Cousins
+    "I": 0.763,     #i - sdss-i' / Sloan i
 }
 
 TARGET_STARS = ["Mark_26", "Mark_76", "Mark_81"]

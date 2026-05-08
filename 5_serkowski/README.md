@@ -76,10 +76,10 @@ corrected and merged .dat files:
 
 Also check the effective wavelengths in LAMBDA_EFF. The values used here are:
 
-    B = 0.440 micron
-    G = 0.530 micron   
-    R = 0.640 micron
-    I = 0.800 micron
+    B = 0.436 micron        #B - Johnson
+    G = 0.477 micron        #g - sdss-g' / Sloan  g
+    R = 0.640 micron        #R - Cousins
+    I = 0.763 micron        #i - sdss-i' / Sloan i
 
 Then run:
 
