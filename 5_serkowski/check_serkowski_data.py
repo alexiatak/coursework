@@ -18,10 +18,10 @@ from collections import defaultdict
 # Configuration 
 
 BAND_FILES = {
-    "B": "../0_data/B/Markkanen_final.dat",
-    "G": "../0_data/G/Markkanen_final.dat",   # G filter — confirm λ_eff 
-    "R": "../0_data/R/Markkanen_final_merged_serkowski.dat",
-    "I": "../0_data/I/Markkanen_final.dat",
+    "B": "../0_data/B/Mark_B_corr.dat",
+    "G": "../0_data/G/Mark_g_corr.dat",   # G filter — confirm λ_eff 
+    "R": "../0_data/R/Mark_R_corr.dat",
+    "I": "../0_data/I/Mark_i_corr.dat",
 }
 
 
