@@ -64,8 +64,10 @@
       EXTERNAL funcs
 
 ! PARAMETERS
-      aK = 1.7
-      bK = 0
+!     aK = 1.7		!wilking+1982
+!     bK = 0
+      aK = 1.86		!whittet+1992
+      bK = -0.10      
 
       test = .FALSE.
 !     test = .TRUE.

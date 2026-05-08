@@ -35,7 +35,7 @@ LAMBDA_EFF = {
 TARGET_STARS = ["Mark_26", "Mark_76", "Mark_81"]
 
 # Serkowski curve for reference (typical ISM: Pmax=1%, lam_max=0.55 um)
-def serkowski(lam, Pmax, lam_max, aK=1.7, bK=0.0):
+def serkowski(lam, Pmax, lam_max, aK=1.86, bK=-0.10):
     K = aK * lam_max + bK
     return Pmax * np.exp(-K * np.log(lam_max / lam)**2)
 
