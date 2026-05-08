@@ -25,6 +25,12 @@ OUTPUT 2 — crossmatched_<polygon>.csv (One row per observed star that has a Pa
 Dependencies
     pip install astropy pandas numpy matplotlib pygplates
     pip install healpy   # optional — only for the FITS background plot
+    
+run:
+python agglomeration_polygon_selector.py --polygon combined
+    or
+python agglomeration_polygon_selector.py --polygon expanded 
+
 """
 
 from __future__ import annotations
@@ -78,6 +84,40 @@ EXPANDED_POLYGON: List[Tuple[float, float]] = [
     (316.0, 79.0),      
     (335.0, 81.5),
     (353.0, 78.5),
+]
+
+# "first polygon" from Sample_skyplot.ipynb 
+UPPER_POLYGON: List[Tuple[float, float]] = [
+    (357.2, 81.5),
+    (347.0, 83.0),
+    (343.0, 84.0),
+    (265.0, 85.0),
+    (256.0, 81.0),
+    (254.0, 78.0),
+    (265.0, 77.8),
+    (275.0, 79.5),
+    (296.5, 81.8),
+    (326.7, 82.6),
+    (337.0, 82.2),
+    (349.5, 80.8),
+]
+
+# "second smaller polygon" from Sample_skyplot.ipynb 
+SMALLER_POLYGON: List[Tuple[float, float]] = [
+    (252.0, 75.0),
+    (246.0, 73.8),
+    (247.0, 72.9),
+    (250.0, 73.3),
+    (251.9, 72.4),
+    (255.2, 73.4),
+]
+
+# "third even smaller polygon" from Sample_skyplot.ipynb 
+SMALLEST_POLYGON: List[Tuple[float, float]] = [
+    (238.0, 68.0),
+    (242.0, 69.8),
+    (243.9, 68.9),
+    (240.5, 68.0),
 ]
 
 # Panopoulou catalog — required columns (exact header spelling)
@@ -223,6 +263,46 @@ def select_inside_polygon(
     return SelectionResult(selected=selected, polygon=list(points_lb))
 
 
+def select_combined(
+    df: pd.DataFrame,
+    sub_polygons: dict,
+) -> pd.DataFrame:
+    """
+    Run the polygon test for several sub-polygons at once.
+
+    Parameters----->
+    df           : catalog with l, b columns
+    sub_polygons : mapping {label -> list of (l, b) vertex pairs}
+
+    Returns------->
+    DataFrame containing every star that falls inside at least one sub-polygon,
+    deduplicated by GID, with a 'which_polygon' column listing the labels of all
+    sub-polygons that contain the star (comma-joined).
+    """
+    pieces = []
+    for label, points_lb in sub_polygons.items():
+        sub = select_inside_polygon(df, points_lb).selected.copy()
+        sub["which_polygon"] = label
+        pieces.append(sub)
+
+    if not pieces:
+        return pd.DataFrame()
+
+    merged = pd.concat(pieces, ignore_index=True)
+
+    # Collapse duplicates: one row per GID, comma-joined which_polygon labels
+    grouped = (
+        merged.groupby("GID", sort=False)["which_polygon"]
+        .apply(lambda s: ",".join(sorted(set(s))))
+        .reset_index()
+    )
+    deduped = merged.drop_duplicates(subset="GID", keep="first").drop(
+        columns="which_polygon"
+    )
+    out = deduped.merge(grouped, on="GID", how="left").reset_index(drop=True)
+    return out
+
+
 # crossmatch
 def crossmatch_with_observed(
     external_df: pd.DataFrame,
@@ -289,6 +369,7 @@ def save_selection(df: pd.DataFrame, output_path: Path) -> None:
     cols = (
         ["GID", "starID", "RA", "DEC", "l", "b", "p", "e_p", "evpa", "e_evpa","FilterID", "origin"]
         + [c for c in PANOPOULOU_DIST_COLS if c in df.columns]
+        + (["which_polygon"] if "which_polygon" in df.columns else [])
     )
     df.to_csv(output_path, index=False, columns=[c for c in cols if c in df.columns])
 
@@ -312,17 +393,29 @@ def quick_plot(
     polygon: Sequence[Tuple[float, float]],
     diff_map_path: Path | None = None,
     show_polygon: bool = True,
+    polygon_name: str = "expanded",
+    extra_polygons: dict | None = None,
 ) -> None:
     """
     Diagnostic scatter plot of the selected Panopoulou polygon stars.
     Uses a HEALPix dust-map background if healpy and the FITS file are available;
     falls back to a plain matplotlib scatter otherwise.
+
+    Parameters----->
+    polygon        : main polygon outline to draw
+    polygon_name   : used in title and output filename
+    extra_polygons : optional {label -> [(l, b), ...]} of additional outlines
+                     to overlay (used in combined mode)
     """
-    output_fig = Path("expanded_polygon_selection.png")
+    output_fig = Path(f"{polygon_name}_polygon_selection.png")
     output_fig.parent.mkdir(parents=True, exist_ok=True)
+    title = f"{polygon_name.capitalize()} polygon selection"
 
     #plt.figure(figsize=(10, 10))           #don't need them whily using healpix
     used_healpy = False
+
+    extras = extra_polygons or {}
+    extra_colors = ["cyan", "yellow", "lime", "magenta", "orange"]
 
     if diff_map_path is not None and diff_map_path.exists() and hp is not None:
         diff_map = hp.read_map(str(diff_map_path))
@@ -330,7 +423,7 @@ def quick_plot(
             diff_map,
             rot=[265, 80], min=-0.03, max=0.03, cmap="magma",
             xsize=150, ysize=150, fig=1, coord="G", reso=11,
-            title="Expanded polygon selection", unit="diff", format="%.2g",
+            title=title, unit="diff", format="%.2g",
         )
         hp.graticule()
         hp.projscatter(
@@ -341,6 +434,13 @@ def quick_plot(
             poly_l = [p[0] for p in polygon] + [polygon[0][0]]
             poly_b = [p[1] for p in polygon] + [polygon[0][1]]
             hp.projplot(poly_l, poly_b, lonlat=True, coord="G")
+        for i, (label, pts) in enumerate(extras.items()):
+            poly_l = [p[0] for p in pts] + [pts[0][0]]
+            poly_b = [p[1] for p in pts] + [pts[0][1]]
+            hp.projplot(
+                poly_l, poly_b, lonlat=True, coord="G",
+                color=extra_colors[i % len(extra_colors)],
+            )
         used_healpy = True
 
     if not used_healpy:
@@ -350,10 +450,18 @@ def quick_plot(
             poly_l = [p[0] for p in polygon] + [polygon[0][0]]
             poly_b = [p[1] for p in polygon] + [polygon[0][1]]
             plt.plot(poly_l, poly_b, label="Polygon boundary")
-            plt.legend()
+        for i, (label, pts) in enumerate(extras.items()):
+            poly_l = [p[0] for p in pts] + [pts[0][0]]
+            poly_b = [p[1] for p in pts] + [pts[0][1]]
+            plt.plot(
+                poly_l, poly_b,
+                color=extra_colors[i % len(extra_colors)],
+                label=label,
+            )
+        plt.legend()
         plt.xlabel("Galactic longitude l [deg]")
         plt.ylabel("Galactic latitude b [deg]")
-        plt.title("Expanded polygon selection")
+        plt.title(title)
         plt.gca().invert_xaxis()
 
     #plt.tight_layout()         #don't need them whily using healpix
@@ -364,7 +472,12 @@ def quick_plot(
 
 
 def choose_polygon(name: str) -> List[Tuple[float, float]]:
-    presets = {"original": ORIGINAL_POLYGON, "expanded": EXPANDED_POLYGON}
+    presets = {
+        "original": ORIGINAL_POLYGON,
+        "expanded": EXPANDED_POLYGON,
+        "smaller":  SMALLER_POLYGON,
+        "smallest": SMALLEST_POLYGON,
+    }
     if name not in presets:
         raise ValueError(f"Unknown polygon preset '{name}'. Choose: {list(presets)}")
     return presets[name]
@@ -388,9 +501,11 @@ def parse_args() -> argparse.Namespace:
         help="Path to your observed merged_output.csv",
     )
     parser.add_argument(
-        "--output", type=Path,
-        default=Path("..") / "0_data" / "R" / "external_panopoulou_expanded_polygon.csv",
-        help="Where to save the selected external stars",
+        "--output", type=Path, default=None,
+        help=(
+            "Where to save the selected external stars. "
+            "If omitted, defaults to ../0_data/R/external_panopoulou_<polygon>_polygon.csv"
+        ),
     )
     parser.add_argument(
         "--match-output", type=Path,
@@ -398,8 +513,14 @@ def parse_args() -> argparse.Namespace:
         help="Where to save the crossmatched pairs",
     )
     parser.add_argument(
-        "--polygon", choices=["original", "expanded"], default="expanded",
-        help="Polygon preset to use (default: expanded)",
+        "--polygon",
+        choices=["original", "expanded", "smaller", "smallest", "combined"],
+        default="expanded",
+        help=(
+            "Polygon preset to use (default: expanded). "
+            "'combined' takes the union of upper + smaller + smallest sub-polygons "
+            "and tags each star with which sub-polygon(s) contain it."
+        ),
     )
     parser.add_argument(
         "--diff-map", type=Path,
@@ -421,7 +542,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    polygon = choose_polygon(args.polygon)
+
+    if args.output is None:
+        args.output = (
+            Path("..") / "0_data" / "R"
+            / f"external_panopoulou_{args.polygon}_polygon.csv"
+        )
 
 
     print(f"Loading Panopoulou catalog: {args.catalog}")
@@ -436,10 +562,31 @@ def main() -> None:
     catalog = coarse_region_cut(catalog)
     print(f"  {len(catalog)} stars after rectangular cut")
 
-    result = select_inside_polygon(catalog, polygon)
-    print(f"  {len(result.selected)} stars inside the '{args.polygon}' polygon")
+    if args.polygon == "combined":
+        sub_polys = {
+            "upper":    UPPER_POLYGON,
+            "smaller":  SMALLER_POLYGON,
+            "smallest": SMALLEST_POLYGON,
+        }
+        selected = select_combined(catalog, sub_polys)
+        print(f"  {len(selected)} unique stars inside upper ∪ smaller ∪ smallest")
+        if len(selected):
+            counts = selected["which_polygon"].value_counts()
+            for label, n in counts.items():
+                print(f"    which_polygon={label}: {n}")
+        # For plotting we use the upper polygon as the 'main' outline and
+        # overlay smaller + smallest on top
+        main_polygon_outline = UPPER_POLYGON
+        extra_polygons = {"smaller": SMALLER_POLYGON, "smallest": SMALLEST_POLYGON}
+    else:
+        polygon = choose_polygon(args.polygon)
+        result = select_inside_polygon(catalog, polygon)
+        selected = result.selected
+        print(f"  {len(selected)} stars inside the '{args.polygon}' polygon")
+        main_polygon_outline = result.polygon
+        extra_polygons = None
 
-    save_selection(result.selected, args.output)
+    save_selection(selected, args.output)
     print(f"Polygon selection saved → {args.output}")
 
     print(f"\nLoading observed catalog: {args.merged_catalog}")
@@ -447,7 +594,7 @@ def main() -> None:
     print(f"  {len(observed)} observed stars loaded")
 
     matched = crossmatch_with_observed(
-        result.selected,
+        selected,
         observed,
         max_sep_arcsec=args.max_sep_arcsec,
     )
@@ -465,10 +612,16 @@ def main() -> None:
                 f"evpa={row['evpa']:.1f}±{row['e_evpa']:.1f} deg"
             )
     else:
-        print("  No crossmatches found — check --max-sep-arcsec or sky coverage.")
+        print("  No crossmatches found, check --max-sep-arcsec or sky coverage.")
 
     if args.plot:
-        quick_plot(result.selected, result.polygon, diff_map_path=args.diff_map)
+        quick_plot(
+            selected,
+            main_polygon_outline,
+            diff_map_path=args.diff_map,
+            polygon_name=args.polygon,
+            extra_polygons=extra_polygons,
+        )
 
 
 if __name__ == "__main__":
