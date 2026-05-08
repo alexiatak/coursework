@@ -70,6 +70,27 @@ OUT_DIR = os.path.expanduser(
 )
 
 FIG_DPI = 220
+
+
+# Unit conversion: K_CMB -> MJy/sr at 353 GHz (computed at run time).
+# Set to None to compute automatically via astropy; or hardcode a float.
+# The standard value is ~287.45 MJy/sr per K_CMB.
+KCMB_TO_MJYSR = None   # computed in main() and passed to plot_scatter()
+
+# Reference lines from the literature (plotted through the origin).
+# Slopes are in MJy/sr per unit fractional polarization (not percent).
+# Toggle either line off by setting the corresponding flag to False.
+SHOW_PLANCK_REFLINE      = True   # Planck Coll. XII 2020: R_P/p = -5.42 MJy/sr
+SHOW_MEHANDIRATTA_REFLINE = True  # Mehandiratta+2026: -5.13 (Q), -3.64 (U)
+
+# Planck XII 2020 all-sky R_P/p (same value on both panels)
+_PLANCK_SLOPE = -5.42          # MJy/sr
+
+# Mehandiratta+2026 per-panel slopes (Q panel, U panel)
+_MEHANDIRATTA_SLOPE_Q = -5.13  # MJy/sr
+_MEHANDIRATTA_SLOPE_U = -3.64  # MJy/sr
+# ---------------------------------------------------------------------------
+
 # Optional rebinning of stars into coarser HEALPix pixels for averaging.
 # The smoothed Planck map stays at native Nside (1024); we only change the
 # pixelization used to group stars when computing per-pixel weighted means.
@@ -303,29 +324,50 @@ def load_robopol(path):
 
 
 
-def plot_scatter(paired, pix_avg, outfile):
-    """Two-panel Mehandiratta-style scatter with York fit."""
+def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr):
+    """Two-panel Mehandiratta-style scatter with York fit.
+
+    Planck Q/U are converted from K_CMB to MJy/sr for the plot and the fit.
+    Optical q/u are converted from percent to fraction for the plot and fit,
+    so the fit slope is directly in MJy/sr.
+    CSV outputs are NOT changed (they stay in K_CMB and percent).
+    """
     fig, axes = plt.subplots(1, 2, figsize=(13, 6))
 
+    # Reference slopes in MJy/sr per unit fraction; one entry per panel.
+    ref_slopes = [
+        # (planck_ref_slope, mehandiratta_slope)
+        (_PLANCK_SLOPE, _MEHANDIRATTA_SLOPE_Q),   # Q panel
+        (_PLANCK_SLOPE, _MEHANDIRATTA_SLOPE_U),   # U panel
+    ]
+
     panels = [
-        (axes[0], "q_gal", "sq_gal", r"$q_{\rm v}^{\rm gal}$  [%]",
-         "Q_planck_KCMB", r"$Q_{\rm 353}$  [K$_{\rm CMB}$]"),
-        (axes[1], "u_gal", "su_gal", r"$u_{\rm v}^{\rm gal}$  [%]",
-         "U_planck_KCMB", r"$U_{\rm 353}$  [K$_{\rm CMB}$]"),
+        (axes[0], "q_gal", "sq_gal",
+         r"$q_{\rm v}^{\rm gal}$  [fraction]",
+         "Q_planck_KCMB",
+         r"$Q_{\rm 353}$  [MJy sr$^{-1}$]",
+         ref_slopes[0]),
+        (axes[1], "u_gal", "su_gal",
+         r"$u_{\rm v}^{\rm gal}$  [fraction]",
+         "U_planck_KCMB",
+         r"$U_{\rm 353}$  [MJy sr$^{-1}$]",
+         ref_slopes[1]),
     ]
 
     fit_summary = {}
-    for ax, qcol, scol, qlabel, planckcol, planckname in panels:
-        
-        # per-pixel (strong)
-        ax.errorbar(pix_avg[qcol], pix_avg[planckcol],
-                    xerr=pix_avg[scol], fmt="o", ms=6,
+    for ax, qcol, scol, qlabel, planckcol, planckname, (sl_planck, sl_meh) in panels:
+
+        # Convert units for plotting/fitting only (do not modify the DataFrames).
+        x_data = pix_avg[qcol].to_numpy(float) / 100.0          # percent -> fraction
+        x_err  = pix_avg[scol].to_numpy(float) / 100.0
+        y_data = pix_avg[planckcol].to_numpy(float) * kcmb_to_mjysr  # K_CMB -> MJy/sr
+
+        # per-pixel points
+        ax.errorbar(x_data, y_data,
+                    xerr=x_err, fmt="o", ms=6,
                     color="forestgreen", alpha=1.0, mec="black", mew=0.4,
                     label=f"per pixel (N={len(pix_avg)})", zorder=3)
 
-        x_data = pix_avg[qcol].to_numpy(float)
-        y_data = pix_avg[planckcol].to_numpy(float)
-        x_err = pix_avg[scol].to_numpy(float)
         y_err_dummy = np.full_like(y_data,
                                    max(0.01 * np.nanstd(y_data), 1e-12))
         a, b, sa, sb_formal, chi2_red = york_fit(x_data, y_data, x_err,
@@ -343,10 +385,23 @@ def plot_scatter(paired, pix_avg, outfile):
                     s_res = np.sqrt(np.sum(res ** 2) / (n_ok - 2))
                     sb_resid = s_res / np.sqrt(Sxx)
                     sb = max(sb_formal, sb_resid)
-            xx = np.linspace(np.nanmin(x_data) - 0.05,
-                             np.nanmax(x_data) + 0.05, 50)
+            x_pad = 0.2 * (np.nanmax(x_data) - np.nanmin(x_data))
+            xx = np.linspace(np.nanmin(x_data) - x_pad,
+                             np.nanmax(x_data) + x_pad, 50)
             ax.plot(xx, a + b * xx, color="black", lw=1.2, zorder=4,
-                    label=f"slope = {b:.2e} \u00b1 {sb:.1e}\n|R| = {abs(b):.2e}")
+                    label=f"York fit: slope = {b:.2f} \u00b1 {sb:.2f} MJy/sr")
+
+        # Reference lines through the origin.
+        x_ref = np.array([np.nanmin(x_data) - 0.002,
+                          np.nanmax(x_data) + 0.002])
+        if SHOW_PLANCK_REFLINE:
+            ax.plot(x_ref, sl_planck * x_ref,
+                    color="steelblue", lw=1.2, ls="--", zorder=2,
+                    label=fr"Planck XII 2020: $R_{{P/p}}$ = {sl_planck:.2f} MJy/sr")
+        if SHOW_MEHANDIRATTA_REFLINE:
+            ax.plot(x_ref, sl_meh * x_ref,
+                    color="tomato", lw=1.2, ls="-.", zorder=2,
+                    label=fr"Mehandiratta+2026: $R_{{P/p}}$ = {sl_meh:.2f} MJy/sr")
 
         ax.axhline(0, color="k", lw=0.5, alpha=0.5)
         ax.axvline(0, color="k", lw=0.5, alpha=0.5)
@@ -441,10 +496,20 @@ def main():
           f"({(paired['pix'].value_counts() > 1).sum()} pixels with >1 star)")
 
     print("\n[4/4] Plotting and writing outputs")
+
+    # Compute K_CMB -> MJy/sr at 353 GHz using astropy thermodynamic equivalency.
+    global KCMB_TO_MJYSR
+    if KCMB_TO_MJYSR is None:
+        from astropy.cosmology import Planck15
+        freq_353 = 353e9 * u.Hz
+        equiv = u.thermodynamic_temperature(freq_353, Planck15.Tcmb0)
+        KCMB_TO_MJYSR = float((1.0 * u.K).to(u.MJy / u.sr, equivalencies=equiv).value)
+    print(f"  K_CMB -> MJy/sr at 353 GHz: {KCMB_TO_MJYSR:.4f} MJy/sr per K_CMB")
+
     tag = _bin_tag(map_nside, effective_bin_nside)
     out_png = os.path.join(OUT_DIR,
                            f"markkanen_planck_starlight_scatter{tag}.png")
-    fits = plot_scatter(paired, pix_avg, out_png)
+    fits = plot_scatter(paired, pix_avg, out_png, KCMB_TO_MJYSR)
     paired.to_csv(os.path.join(OUT_DIR,
                                f"planck_starlight_paired_robopol{tag}.csv"),
                   index=False)
@@ -459,7 +524,7 @@ def main():
           f"({len(pix_avg)} rows)")
 
     print("\n" + "=" * 70)
-    print("Fit summary  (slopes from per-pixel data)")
+    print("Fit summary  (slopes from per-pixel data, units: MJy/sr per fraction)")
     print("=" * 70)
     for label, key, sign in [("Q vs q", "q_gal", "Q"), ("U vs u", "u_gal", "U")]:
         f = fits[key]
