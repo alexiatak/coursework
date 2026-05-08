@@ -46,7 +46,8 @@ MERGED_CSV = r"../2_sky_plot/merged_output.csv"      # your RoboPol merged table
 BJ_CSV = r"bj_distances.csv"                          # Bailer-Jones distances for RoboPol stars
 
 # Panopoulou+25 catalog within the polygon (already has BJ distances merged)
-PANOPOULOU_CSV = r"../0_data/R/external_panopoulou_expanded_polygon.csv"
+#PANOPOULOU_CSV = r"../0_data/R/external_panopoulou_expanded_polygon.csv"
+PANOPOULOU_CSV = r"../0_data/R/external_panopoulou_combined_polygon.csv"
 
 # Toggle external overlay. Set False to reproduce the previous plot exactly.
 SHOW_PANOPOULOU = True

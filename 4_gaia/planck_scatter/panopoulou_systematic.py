@@ -35,7 +35,7 @@ ROBOPOL_CSV = os.path.expanduser(
 )
 
 PANOPOULOU_CSV = os.path.expanduser(
-    "~/Desktop/coursework/0_data/R/external_panopoulou_expanded_polygon.csv"
+    "~/Desktop/coursework/0_data/R/external_panopoulou_combined_polygon.csv"
 )
 
 OUT_DIR = os.path.expanduser(

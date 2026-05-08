@@ -4,43 +4,42 @@ Panopoulou+25 systematic diagnostic (Markkanen field)
 
 [1] Panopoulou: weighted means by FilterID
   FilterID      N        <q>      sigma        <u>      sigma
-         0    104    -0.0575     0.0021    +0.0770     0.0020
-        20      2    +0.0002     0.0005    +0.0001     0.0002
+         0     34    -0.0889     0.0035    +0.0837     0.0036
 
 [1b] Panopoulou: weighted means by origin
           origin      N        <q>      sigma        <u>      sigma
-external_panopoulou_2025    106    -0.0033     0.0005    +0.0007     0.0002
+external_panopoulou_2025     34    -0.0889     0.0035    +0.0837     0.0036
 
 [2] Whole-sample comparison
-  Panopoulou+25 (N=106):  <q>=-0.0033±0.0005  <u>=+0.0007±0.0002
+  Panopoulou+25 (N=34):  <q>=-0.0889±0.0035  <u>=+0.0837±0.0036
   RoboPol       (N=154):  <q>=-0.0718±0.0040  <u>=+0.2684±0.0038
 
 [3] Pano - RoboPol offset
-  delta q = +0.0685 ± 0.0040  (17.2σ)
-  delta u = -0.2677 ± 0.0038  (70.1σ)
+  delta q = -0.0171 ± 0.0053  (3.3σ)
+  delta u = -0.1846 ± 0.0052  (35.4σ)
 
 [4] Localized distance-window comparisons (Pano vs RoboPol)
 
-  Window: 150-400 pc (primary overlap)  (Pano N=53, RoboPol N=55)
-    q:  <q>_pano=-0.0519±0.0028  <q>_robo=-0.0503±0.0066
-        delta = -0.0016 ± 0.0072  (weighted-mean z = -0.22, p = 8.28e-01)
-        Student t = -0.93  (dof=106, p = 3.55e-01)
-        Welch   t = -0.94  (dof=71.0, p = 3.49e-01)
-    u:  <u>_pano=+0.0873±0.0027  <u>_robo=+0.2349±0.0064
-        delta = -0.1476 ± 0.0070  (weighted-mean z = -21.19, p = 1.15e-99)
-        Student t = -6.45  (dof=105, p = 3.42e-09)
-        Welch   t = -6.57  (dof=76.9, p = 5.29e-09)
+  Window: 150-400 pc (primary overlap)  (Pano N=15, RoboPol N=55)
+    q:  <q>_pano=-0.1226±0.0062  <q>_robo=-0.0503±0.0066
+        delta = -0.0723 ± 0.0091  (weighted-mean z = -7.97, p = 1.57e-15)
+        Student t = -1.56  (dof=68, p = 1.23e-01)
+        Welch   t = -2.47  (dof=60.3, p = 1.65e-02)
+    u:  <u>_pano=+0.0777±0.0064  <u>_robo=+0.2349±0.0064
+        delta = -0.1573 ± 0.0090  (weighted-mean z = -17.41, p = 6.68e-68)
+        Student t = -3.97  (dof=68, p = 1.75e-04)
+        Welch   t = -6.01  (dof=54.1, p = 1.63e-07)
 
-  Window: 0-200 pc (foreground)  (Pano N=53, RoboPol N=0)
+  Window: 0-200 pc (foreground)  (Pano N=15, RoboPol N=0)
     Skipped: too few stars in this window.
 
-  Window: 200-500 pc (cloud regime)  (Pano N=44, RoboPol N=76)
-    q:  <q>_pano=-0.0494±0.0031  <q>_robo=-0.0694±0.0054
-        delta = +0.0200 ± 0.0062  (weighted-mean z = +3.21, p = 1.34e-03)
-        Student t = -0.31  (dof=118, p = 7.55e-01)
-        Welch   t = -0.39  (dof=102.7, p = 7.00e-01)
-    u:  <u>_pano=+0.0934±0.0031  <u>_robo=+0.2347±0.0055
-        delta = -0.1413 ± 0.0063  (weighted-mean z = -22.47, p = 8.35e-112)
-        Student t = -4.61  (dof=117, p = 1.06e-05)
-        Welch   t = -5.70  (dof=105.6, p = 1.11e-07)
+  Window: 200-500 pc (cloud regime)  (Pano N=16, RoboPol N=76)
+    q:  <q>_pano=-0.1073±0.0050  <q>_robo=-0.0694±0.0054
+        delta = -0.0379 ± 0.0074  (weighted-mean z = -5.12, p = 3.07e-07)
+        Student t = -1.03  (dof=90, p = 3.08e-01)
+        Welch   t = -1.87  (dof=76.7, p = 6.59e-02)
+    u:  <u>_pano=+0.1353±0.0054  <u>_robo=+0.2347±0.0055
+        delta = -0.0994 ± 0.0077  (weighted-mean z = -12.95, p = 2.33e-38)
+        Student t = -2.59  (dof=90, p = 1.13e-02)
+        Welch   t = -4.52  (dof=68.2, p = 2.50e-05)
 ======================================================================
