@@ -61,9 +61,11 @@ ROBOPOL_CSV = os.path.expanduser(
 )
 
 PLANCK_DIR = os.path.expanduser("~/Desktop/coursework/3_planck")
-PLANCK_I_FITS = os.path.join(PLANCK_DIR, "planck_353_I_smoothed20arcmin_nside1024_nested.fits")
-PLANCK_Q_FITS = os.path.join(PLANCK_DIR, "planck_353_Q_smoothed20arcmin_nside1024_nested.fits")
-PLANCK_U_FITS = os.path.join(PLANCK_DIR, "planck_353_U_smoothed20arcmin_nside1024_nested.fits")
+PLANCK_I_FITS  = os.path.join(PLANCK_DIR, "planck_353_I_smoothed20arcmin_nside1024_nested.fits")
+PLANCK_Q_FITS  = os.path.join(PLANCK_DIR, "planck_353_Q_smoothed20arcmin_nside1024_nested.fits")
+PLANCK_U_FITS  = os.path.join(PLANCK_DIR, "planck_353_U_smoothed20arcmin_nside1024_nested.fits")
+PLANCK_QQ_FITS = os.path.join(PLANCK_DIR, "planck_353_QQ_Cov_smoothed20arcmin_nside1024_nested.fits")
+PLANCK_UU_FITS = os.path.join(PLANCK_DIR, "planck_353_UU_Cov_smoothed20arcmin_nside1024_nested.fits")
 
 OUT_DIR = os.path.expanduser(
     "~/Desktop/coursework/4_gaia/planck_scatter/planck_output"
@@ -71,7 +73,7 @@ OUT_DIR = os.path.expanduser(
 
 FIG_DPI = 220
 
-
+# ---------------------------------------------------------------------------
 # Unit conversion: K_CMB -> MJy/sr at 353 GHz (computed at run time).
 # Set to None to compute automatically via astropy; or hardcode a float.
 # The standard value is ~287.45 MJy/sr per K_CMB.
@@ -168,11 +170,16 @@ def sample_planck(df_stars):
 
     Returns a frame with columns:
         Name, ra, dec, l, b, pix,
-        I_planck_KCMB, Q_planck_KCMB, U_planck_KCMB
+        I_planck_KCMB, Q_planck_KCMB, U_planck_KCMB,
+        sQ_planck_KCMB, sU_planck_KCMB
+
+    sQ, sU are the per-pixel standard deviations from sqrt(QQ_Cov),
+    sqrt(UU_Cov), both smoothed alongside the signal maps .
 
     NOTE: U_planck_KCMB is FLIPPED on read (COSMO -> IAU).  Q is unchanged.
     """
-    for f in (PLANCK_I_FITS, PLANCK_Q_FITS, PLANCK_U_FITS):
+    for f in (PLANCK_I_FITS, PLANCK_Q_FITS, PLANCK_U_FITS,
+              PLANCK_QQ_FITS, PLANCK_UU_FITS):
         if not os.path.isfile(f):
             sys.exit(f"ERROR: Planck FITS not found: {f}")
         if os.path.getsize(f) < 1000:
@@ -184,6 +191,13 @@ def sample_planck(df_stars):
     Q_map = hp.read_map(PLANCK_Q_FITS, nest=True)
     print(f"  reading U from {os.path.basename(PLANCK_U_FITS)} (flipping COSMO -> IAU)")
     U_map = -hp.read_map(PLANCK_U_FITS, nest=True)
+    print(f"  reading QQ_Cov from {os.path.basename(PLANCK_QQ_FITS)}")
+    QQ_Cov_map = hp.read_map(PLANCK_QQ_FITS, nest=True)
+    print(f"  reading UU_Cov from {os.path.basename(PLANCK_UU_FITS)}")
+    UU_Cov_map = hp.read_map(PLANCK_UU_FITS, nest=True)
+    # Guard against tiny negative values from smoothing kernel ringing.
+    QQ_Cov_map = np.clip(QQ_Cov_map, 0.0, None)
+    UU_Cov_map = np.clip(UU_Cov_map, 0.0, None)
     nside = hp.get_nside(I_map)
     print(f"  Nside = {nside}")
 
@@ -221,6 +235,8 @@ def sample_planck(df_stars):
         "I_planck_KCMB": I_map[pix],
         "Q_planck_KCMB": Q_map[pix],
         "U_planck_KCMB": U_map[pix],
+        "sQ_planck_KCMB": np.sqrt(QQ_Cov_map[pix]),
+        "sU_planck_KCMB": np.sqrt(UU_Cov_map[pix]),
     })
     return out, int(nside)
 
@@ -232,17 +248,11 @@ def york_fit(x, y, sx, sy, n_iter=50):
   
     """Weighted linear fit y = a + b*x with errors on both axes.
     Returns (a, b, sa, sb_formal, chi2_red).  No correlation between sx, sy.
- 
-    Why York here (and not the LinMix/emcee approach used in
-    Mehandiratta+2026): we do not have the Planck per-pixel noise
-    covariance maps loaded, only the smoothed intensity maps, so a method
-    that needs C_QQ, C_UU, C_QU is not runnable.  York with real sigma_x
-    (RoboPol) and a small dummy sigma_y is the right cheap proxy: it
-    reduces to weighted-x fitting in this regime, correctly down-weights
-    points with large optical errors (Mark_65 concern), and gives an
-    unbiased slope.  The reported slope error is rescaled to
-    max(sb_formal, sb_resid) by the caller in plot_scatter() to be honest
-    about residual scatter. 
+
+    sigma_y now comes from sqrt(QQ_Cov) / sqrt(UU_Cov) of the smoothed
+    Planck covariance maps.
+    Planck XII 2020 note that with proper errors on both axes, York gives
+    results consistent with the Kelly (2007) Bayesian method (LinMix).
     """
     
     x = np.asarray(x, dtype=float); y = np.asarray(y, dtype=float)
@@ -299,7 +309,8 @@ def average_per_pixel(df_paired, value_cols, err_cols):
             w = 1.0 / errs[mask] ** 2
             row[v] = float((w * vals[mask]).sum() / w.sum())
             row[e] = float(np.sqrt(1.0 / w.sum()))
-        for col in ("Q_planck_KCMB", "U_planck_KCMB", "I_planck_KCMB"):
+        for col in ("Q_planck_KCMB", "U_planck_KCMB", "I_planck_KCMB",
+                    "sQ_planck_KCMB", "sU_planck_KCMB"):
             if col in grp.columns:
                 row[col] = float(grp[col].iloc[0])
         rows.append(row)
@@ -329,7 +340,7 @@ def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr):
 
     Planck Q/U are converted from K_CMB to MJy/sr for the plot and the fit.
     Optical q/u are converted from percent to fraction for the plot and fit,
-    so the fit slope is directly in MJy/sr.
+    so the fit slope is directly in MJy/sr (comparable to R_P/p literature).
     CSV outputs are NOT changed (they stay in K_CMB and percent).
     """
     fig, axes = plt.subplots(1, 2, figsize=(13, 6))
@@ -344,34 +355,33 @@ def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr):
     panels = [
         (axes[0], "q_gal", "sq_gal",
          r"$q_{\rm v}^{\rm gal}$  [fraction]",
-         "Q_planck_KCMB",
+         "Q_planck_KCMB", "sQ_planck_KCMB",
          r"$Q_{\rm 353}$  [MJy sr$^{-1}$]",
          ref_slopes[0]),
         (axes[1], "u_gal", "su_gal",
          r"$u_{\rm v}^{\rm gal}$  [fraction]",
-         "U_planck_KCMB",
+         "U_planck_KCMB", "sU_planck_KCMB",
          r"$U_{\rm 353}$  [MJy sr$^{-1}$]",
          ref_slopes[1]),
     ]
 
     fit_summary = {}
-    for ax, qcol, scol, qlabel, planckcol, planckname, (sl_planck, sl_meh) in panels:
+    for (ax, qcol, scol, qlabel, planckcol, planck_scol, planckname,
+         (sl_planck, sl_meh)) in panels:
 
         # Convert units for plotting/fitting only (do not modify the DataFrames).
         x_data = pix_avg[qcol].to_numpy(float) / 100.0          # percent -> fraction
         x_err  = pix_avg[scol].to_numpy(float) / 100.0
         y_data = pix_avg[planckcol].to_numpy(float) * kcmb_to_mjysr  # K_CMB -> MJy/sr
+        y_err  = pix_avg[planck_scol].to_numpy(float) * kcmb_to_mjysr  # same conversion
 
-        # per-pixel points
+        # per-pixel points (now with real y-errors from sqrt(QQ_Cov)/sqrt(UU_Cov))
         ax.errorbar(x_data, y_data,
-                    xerr=x_err, fmt="o", ms=6,
+                    xerr=x_err, yerr=y_err, fmt="o", ms=6,
                     color="forestgreen", alpha=1.0, mec="black", mew=0.4,
                     label=f"per pixel (N={len(pix_avg)})", zorder=3)
 
-        y_err_dummy = np.full_like(y_data,
-                                   max(0.01 * np.nanstd(y_data), 1e-12))
-        a, b, sa, sb_formal, chi2_red = york_fit(x_data, y_data, x_err,
-                                                 y_err_dummy)
+        a, b, sa, sb_formal, chi2_red = york_fit(x_data, y_data, x_err, y_err)
 
         sb = sb_formal
         if np.isfinite(b):
@@ -459,6 +469,8 @@ def main():
         "I_planck_KCMB": df_planck["I_planck_KCMB"].values,
         "Q_planck_KCMB": df_planck["Q_planck_KCMB"].values,
         "U_planck_KCMB": df_planck["U_planck_KCMB"].values,
+        "sQ_planck_KCMB": df_planck["sQ_planck_KCMB"].values,
+        "sU_planck_KCMB": df_planck["sU_planck_KCMB"].values,
     })
 
     # Optional coarser binning.

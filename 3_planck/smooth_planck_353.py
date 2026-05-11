@@ -53,13 +53,22 @@ def main():
             "top of this script."
         )
 
-    # ---- 1. Read I, Q, U ---------------------------------------------------
-    # Polarized Planck HFI maps have 10 fields; 0,1,2 are I_Stokes, Q_Stokes, U_Stokes.
-    # At 353 GHz all three are in K_CMB (not MJy/sr).
+    # ---- 1. Read I, Q, U, QQ_Cov, UU_Cov -----------------------------------
+    # Polarized Planck HFI maps have 10 fields; 0,1,2 are I_Stokes, Q_Stokes,
+    # U_Stokes (units K_CMB). Fields 5 and 6 are QQ_Cov and UU_Cov, the per-
+    # pixel variances of Q and U (units K_CMB^2). Reading them here so they
+    # can be smoothed and saved alongside the signal maps.
     print("Reading I, Q, U from", PLANCK_FILE)
     I_in, Q_in, U_in = hp.read_map(PLANCK_FILE, field=(0, 1, 2))
     nside_in = hp.get_nside(I_in)
     print(f"  native nside = {nside_in}, npix = {hp.nside2npix(nside_in)}")
+
+    print("Reading QQ_Cov, UU_Cov (fields 5, 6) ...")
+    QQ_Cov_in, UU_Cov_in = hp.read_map(PLANCK_FILE, field=(5, 6))
+    print(f"  QQ_Cov range: {np.nanmin(QQ_Cov_in):.3e} .. "
+          f"{np.nanmax(QQ_Cov_in):.3e} K_CMB^2")
+    print(f"  UU_Cov range: {np.nanmin(UU_Cov_in):.3e} .. "
+          f"{np.nanmax(UU_Cov_in):.3e} K_CMB^2")
 
     # ---- 2. Downgrade to target_nside (in NESTED for ud_grade efficiency) --
     # The input file is stored in NESTED ordering (Planck convention), but
@@ -69,6 +78,10 @@ def main():
     I_dg = hp.ud_grade(I_in, nside_out=TARGET_NSIDE, order_in='RING', order_out='RING')
     Q_dg = hp.ud_grade(Q_in, nside_out=TARGET_NSIDE, order_in='RING', order_out='RING')
     U_dg = hp.ud_grade(U_in, nside_out=TARGET_NSIDE, order_in='RING', order_out='RING')
+    QQ_Cov_dg = hp.ud_grade(QQ_Cov_in, nside_out=TARGET_NSIDE,
+                            order_in='RING', order_out='RING')
+    UU_Cov_dg = hp.ud_grade(UU_Cov_in, nside_out=TARGET_NSIDE,
+                            order_in='RING', order_out='RING')
 
     # ---- 3. Smooth with a Gaussian kernel ----------------------------------
     # We want the final effective beam to be TARGET_RES. Since the map already has a native beam of ~PLANCK_BEAM, we convolve with a Gaussian of
@@ -86,17 +99,32 @@ def main():
         pol=True,
     )
 
+    # Smooth QQ_Cov, UU_Cov as scalar (spin-0) maps (pol=False, the default).
+    # First-approximation treatment per Dima: smooth the covariance the same
+    # way as the signal. Proper covariance propagation through the beam (in
+    # harmonic space, with noise power spectra) is deferred.
+    print("Smoothing covariance maps as scalar fields (first approximation) ...")
+    QQ_Cov_sm = hp.smoothing(QQ_Cov_dg, fwhm=np.radians(smooth_fwhm_deg), pol=False)
+    UU_Cov_sm = hp.smoothing(UU_Cov_dg, fwhm=np.radians(smooth_fwhm_deg), pol=False)
+    # Clip tiny negatives that can appear from smoothing noise.
+    QQ_Cov_sm = np.clip(QQ_Cov_sm, 0.0, None)
+    UU_Cov_sm = np.clip(UU_Cov_sm, 0.0, None)
+
     # ---- 4. Write outputs --------------------------------------------------
     # Match Planck convention of writing in NESTED ordering
     
     I_sm_n = hp.reorder(I_sm, r2n=True)
     Q_sm_n = hp.reorder(Q_sm, r2n=True)
     U_sm_n = hp.reorder(U_sm, r2n=True)
+    QQ_Cov_sm_n = hp.reorder(QQ_Cov_sm, r2n=True)
+    UU_Cov_sm_n = hp.reorder(UU_Cov_sm, r2n=True)
 
     tag = f"smoothed{int(TARGET_RES*60):02d}arcmin_nside{TARGET_NSIDE}_nested"
-    out_I = os.path.join(OUT_DIR, f"planck_353_I_{tag}.fits")
-    out_Q = os.path.join(OUT_DIR, f"planck_353_Q_{tag}.fits")
-    out_U = os.path.join(OUT_DIR, f"planck_353_U_{tag}.fits")
+    out_I  = os.path.join(OUT_DIR, f"planck_353_I_{tag}.fits")
+    out_Q  = os.path.join(OUT_DIR, f"planck_353_Q_{tag}.fits")
+    out_U  = os.path.join(OUT_DIR, f"planck_353_U_{tag}.fits")
+    out_QQ = os.path.join(OUT_DIR, f"planck_353_QQ_Cov_{tag}.fits")
+    out_UU = os.path.join(OUT_DIR, f"planck_353_UU_Cov_{tag}.fits")
 
     hp.write_map(out_I, I_sm_n, nest=True, coord='G',
                  column_units='K_CMB', overwrite=True)
@@ -104,8 +132,12 @@ def main():
                  column_units='K_CMB', overwrite=True)
     hp.write_map(out_U, U_sm_n, nest=True, coord='G',
                  column_units='K_CMB', overwrite=True)
+    hp.write_map(out_QQ, QQ_Cov_sm_n, nest=True, coord='G',
+                 column_units='K_CMB^2', overwrite=True)
+    hp.write_map(out_UU, UU_Cov_sm_n, nest=True, coord='G',
+                 column_units='K_CMB^2', overwrite=True)
     print("Wrote:")
-    for f in (out_I, out_Q, out_U):
+    for f in (out_I, out_Q, out_U, out_QQ, out_UU):
         print(f"  {f}  ({os.path.getsize(f)/1e6:.1f} MB)")
 
     # ---- 5. Sanity-check plot ----------------------------------------------
