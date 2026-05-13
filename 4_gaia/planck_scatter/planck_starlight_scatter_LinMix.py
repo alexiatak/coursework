@@ -71,6 +71,10 @@ ROBOPOL_CSV = os.path.expanduser(
     "~/Desktop/coursework/2_sky_plot/merged_output.csv"
 )
 
+PANOPOULOU_CSV = os.path.expanduser(
+    "~/Desktop/coursework/0_data/R/external_panopoulou_combined_polygon.csv"
+)
+
 PLANCK_DIR = os.path.expanduser("~/Desktop/coursework/3_planck")
 PLANCK_I_FITS  = os.path.join(PLANCK_DIR, "planck_353_I_smoothed20arcmin_nside1024_nested.fits")
 PLANCK_Q_FITS  = os.path.join(PLANCK_DIR, "planck_353_Q_smoothed20arcmin_nside1024_nested.fits")
@@ -104,6 +108,7 @@ KCMB_TO_MJYSR = None   # computed in main() and passed to plot_scatter()
 # Toggle either line off by setting the corresponding flag to False.
 SHOW_PLANCK_REFLINE      = True   # Planck Coll. XII 2020: R_P/p = -5.42 MJy/sr
 SHOW_MEHANDIRATTA_REFLINE = True  # Mehandiratta+2026: -5.13 (Q), -3.64 (U)
+SHOW_PANOPOULOU           = True  # overlay Panopoulou+2025 stars as a second set
 
 # Planck XII 2020 all-sky R_P/p (same value on both panels)
 _PLANCK_SLOPE = -5.42          # MJy/sr
@@ -375,7 +380,7 @@ def load_robopol(path):
 
 
 
-def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr):
+def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr, paired_pano=None):
     """Two-panel Mehandiratta-style scatter with LinMix fits.
 
     Planck Q/U are converted from K_CMB to MJy/sr for the plot and the fit.
@@ -425,7 +430,18 @@ def plot_scatter(paired, pix_avg, outfile, kcmb_to_mjysr):
         ax.errorbar(x_data, y_data,
                     xerr=x_err, yerr=y_err, fmt="o", ms=6,
                     color="forestgreen", alpha=1.0, mec="black", mew=0.4,
-                    label=f"per pixel (N={len(pix_avg)})", zorder=3)
+                    label=f"per pixel (N={len(pix_avg)})", zorder=2)
+
+        # Optional Panopoulou+2025 overlay (not used in the fit).
+        if paired_pano is not None and len(paired_pano) > 0:
+            xp = paired_pano[qcol].to_numpy(float) / 100.0
+            xpe = paired_pano[scol].to_numpy(float) / 100.0
+            yp = paired_pano[planckcol].to_numpy(float) * kcmb_to_mjysr
+            ype = paired_pano[planck_scol].to_numpy(float) * kcmb_to_mjysr
+            ax.errorbar(xp, yp, xerr=xpe, yerr=ype, fmt="s", ms=4,
+                        color="darkorange", alpha=0.7, mec="black", mew=0.3,
+                        label=f"Panopoulou+2025 (N={len(paired_pano)})",
+                        zorder=4)
 
         a, b, sa, sb, chi2_red = linmix_fit(x_data, y_data, x_err, y_err,
                                             K=LINMIX_K)
@@ -562,16 +578,74 @@ def main():
         KCMB_TO_MJYSR = float((1.0 * u.K).to(u.MJy / u.sr, equivalencies=equiv).value)
     print(f"  K_CMB -> MJy/sr at 353 GHz: {KCMB_TO_MJYSR:.4f} MJy/sr per K_CMB")
 
+    # Optionally build the Panopoulou+2025 overlay (same pipeline as RoboPol,
+    # but no pixel-averaging; raw per-star points are plotted as the overlay).
+    paired_pano = None
+    if SHOW_PANOPOULOU and os.path.isfile(PANOPOULOU_CSV):
+        print(f"\n  Loading Panopoulou+2025 from {PANOPOULOU_CSV}")        
+        df_pano_raw = pd.read_csv(PANOPOULOU_CSV)
+        df_pano_raw = df_pano_raw.dropna(subset=["p", "evpa", "e_p", "e_evpa"])
+            # p is a fraction (0-1); convert to percent to match RoboPol units.
+        p_pct = df_pano_raw["p"].to_numpy(float) * 100.0
+        ep_pct = df_pano_raw["e_p"].to_numpy(float) * 100.0
+        psi_rad = np.deg2rad(df_pano_raw["evpa"].to_numpy(float))
+        epsi_rad = np.deg2rad(df_pano_raw["e_evpa"].to_numpy(float))
+        q_eq = p_pct * np.cos(2.0 * psi_rad)
+        u_eq = p_pct * np.sin(2.0 * psi_rad)
+            # error propagation for q = p*cos(2psi), u = p*sin(2psi)
+        sq_eq = np.sqrt((np.cos(2*psi_rad)*ep_pct)**2 + (2*p_pct*np.sin(2*psi_rad)*epsi_rad)**2)
+        su_eq = np.sqrt((np.sin(2*psi_rad)*ep_pct)**2 + (2*p_pct*np.cos(2*psi_rad)*epsi_rad)**2)
+        df_pano = pd.DataFrame({
+            "Name": df_pano_raw["starID"].astype(str).values,
+            "ra": df_pano_raw["RA"].to_numpy(float),
+            "dec": df_pano_raw["DEC"].to_numpy(float),
+            "q": q_eq, "u": u_eq,
+            "sq": sq_eq, "su": su_eq,
+            })
+        df_pano_planck, _ = sample_planck(df_pano)
+        
+        q_gal_p, u_gal_p, sq_gal_p, su_gal_p = optical_to_galactic_qu(
+            df_pano["q"].to_numpy(float),
+            df_pano["u"].to_numpy(float),
+            df_pano["sq"].to_numpy(float),
+            df_pano["su"].to_numpy(float),
+            df_pano["ra"].to_numpy(float),
+            df_pano["dec"].to_numpy(float),
+        )
+        paired_pano = pd.DataFrame({
+            "Name": df_pano["Name"].values,
+            "ra": df_pano["ra"].values,
+            "dec": df_pano["dec"].values,
+            "l": df_pano_planck["l"].values,
+            "b": df_pano_planck["b"].values,
+            "pix": df_pano_planck["pix"].values,
+            "q_gal": q_gal_p, "u_gal": u_gal_p,
+            "sq_gal": sq_gal_p, "su_gal": su_gal_p,
+            "I_planck_KCMB": df_pano_planck["I_planck_KCMB"].values,
+            "Q_planck_KCMB": df_pano_planck["Q_planck_KCMB"].values,
+            "U_planck_KCMB": df_pano_planck["U_planck_KCMB"].values,
+            "sQ_planck_KCMB": df_pano_planck["sQ_planck_KCMB"].values,
+            "sU_planck_KCMB": df_pano_planck["sU_planck_KCMB"].values,
+        })
+        print(f"  Panopoulou overlay: {len(paired_pano)} stars")
+    elif SHOW_PANOPOULOU:
+        print(f"\n  SHOW_PANOPOULOU is True but {PANOPOULOU_CSV} not found; skipping.")
+
     tag = _bin_tag(map_nside, effective_bin_nside)
     out_png = os.path.join(OUT_DIR,
                            f"markkanen_planck_starlight_scatter{tag}.png")
-    fits = plot_scatter(paired, pix_avg, out_png, KCMB_TO_MJYSR)
+    fits = plot_scatter(paired, pix_avg, out_png, KCMB_TO_MJYSR,
+                        paired_pano=paired_pano)
     paired.to_csv(os.path.join(OUT_DIR,
                                f"planck_starlight_paired_robopol{tag}.csv"),
                   index=False)
     pix_avg.to_csv(os.path.join(OUT_DIR,
                                 f"planck_starlight_pixavg_robopol{tag}.csv"),
                    index=False)
+    if paired_pano is not None:
+        paired_pano.to_csv(os.path.join(OUT_DIR,
+                                       f"planck_starlight_paired_panopoulou{tag}.csv"),
+                          index=False)
 
     print(f"\n  wrote {out_png}")
     print(f"  wrote planck_starlight_paired_robopol{tag}.csv "
