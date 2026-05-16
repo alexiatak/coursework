@@ -64,8 +64,10 @@
       EXTERNAL funcs
 
 ! PARAMETERS
-      aK = 1.7
-      bK = 0
+!     aK = 1.7		!wilking+1982
+!     bK = 0
+      aK = 1.86		!whittet+1992
+      bK = -0.10      
 
       test = .FALSE.
 !     test = .TRUE.
@@ -176,7 +178,7 @@
       print *, sLam_m0, sP_m0
       write (17,220) star, Lam_m0, sLam_m0, P_m0, sP_m0,
      &               CHISQ / (nLam - nLam0p) 
-  220 format (1x, A8, 2(2x, F6.3,'+-',F5.3), 1x,F8.2)
+  220 format (1x, A8, 2(2x, F6.3,'+-',F5.3), 1x,F12.6)
 
       print *, ' '
       print *, '                              P/Pmax  '

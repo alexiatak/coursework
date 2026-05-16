@@ -178,7 +178,7 @@
       print *, sLam_m0, sP_m0
       write (17,220) star, Lam_m0, sLam_m0, P_m0, sP_m0,
      &               CHISQ / (nLam - nLam0p) 
-  220 format (1x, A8, 2(2x, F6.3,'+-',F5.3), 1x,F8.2)
+  220 format (1x, A8, 2(2x, F6.3,'+-',F5.3), 1x,F12.6)
 
       print *, ' '
       print *, '                              P/Pmax  '
@@ -192,7 +192,7 @@
   213 format (1x, A8, 
      &       3x, 'Lam_max=', F6.3,'+-',F5.3,
      &       ';  P_max=', F4.2,'+-',F4.2, 
-     &       ';  chi^2=',F4.1, //,
+     &       ';  chi^2=',F10.6, //,
      &       '  lambda   P_cal!       P_obs        1/lam',
      &       '   P_calc/Pmax    P_obs/Pmax     lam_max/lam')
 

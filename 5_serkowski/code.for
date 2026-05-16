@@ -62,8 +62,8 @@
       	EXTERNAL funcs
 
       ! PARAMETERS
-      aK = 1.7
-      	bK = 0
+      aK = 1.86
+      	bK = -0.10
 
       test = .FALSE.
       !	test = .TRUE.
