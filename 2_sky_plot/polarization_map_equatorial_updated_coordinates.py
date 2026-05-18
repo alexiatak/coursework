@@ -37,7 +37,7 @@ print(f"Map loaded: nside={hp.npix2nside(dust_map.size)}")
 df_my = pd.read_csv(MY_STARS)
 df_my = df_my.dropna(subset=["PA[deg]", "P[%]", "ra", "dec"]).reset_index(drop=True)
 N_my  = len(df_my)
-print(f"My stars loaded: {N_my}")
+print(f"Robopol loaded: {N_my}")
 
 df_ext     = pd.read_csv(EXT_CATALOG)
 df_ext_seg = df_ext.dropna(subset=["evpa", "p"]).reset_index(drop=True)
@@ -250,7 +250,7 @@ if EVPA_TEST_MODE:
     print("===================================\n")
 
 leg_my  = mlines.Line2D([], [], color="darkgreen", lw=1.8,
-                         label=f"My stars (N={N_my})")
+                         label=f"Robopol (N={N_my})")
 leg_ext = mlines.Line2D([], [], color="cyan", lw=1.5,
                          label=f"Panopoulou+2025 (N={N_ext})")
 handles = [leg_my, leg_ext]
